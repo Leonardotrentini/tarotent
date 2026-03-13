@@ -563,7 +563,7 @@ body{background:var(--bg);color:var(--cream);font-family:'DM Sans',sans-serif;mi
       <div class="audio-sub">30 minutos · Personalizado para tu herida de vínculo</div>
 
       <audio id="audio-player" preload="metadata" style="display:none;"></audio>
-      
+
       <div class="player">
         <div class="player-waveform" id="waveform"></div>
         <div class="player-controls">
@@ -717,20 +717,20 @@ const DAYS = [
 ];
 
 const BADGES = [
-  {id:'primera',icon:'🌙',nome:'Primeira Noite',req:1},
-  {id:'tres',icon:'🌟',nome:'3 Dias',req:3},
+  {id:'primera',icon:'🌙',nome:'Primera Noche',req:1},
+  {id:'tres',icon:'🌟',nome:'3 Días',req:3},
   {id:'siete',icon:'🔥',nome:'1 Semana',req:7},
-  {id:'quince',icon:'💫',nome:'Metade do Caminho',req:15},
-  {id:'veinte',icon:'🌺',nome:'20 Dias',req:20},
+  {id:'quince',icon:'💫',nome:'Mitad del Camino',req:15},
+  {id:'veinte',icon:'🌺',nome:'20 Días',req:20},
   {id:'treinta',icon:'👑',nome:'Ciclo Completo',req:30},
 ];
 
 const SINAIS = [
-  {titulo:"A Síndrome do Sofá Culpado",desc:"Você senta para descansar às 9 da noite, mas não consegue. Sente uma 'eletricidade' no estômago, como se estivesse esquecendo de fazer algo para alguém. Seu corpo desaprendeu a descansar sem culpa."},
-  {titulo:"O Bruxismo do Silêncio",desc:"Você acorda com a mandíbula travada e tensão na base do pescoço. O médico diz que é estresse. Mas são todas as vezes que você engoliu o que queria dizer para não estragar o clima."},
-  {titulo:"O Cofre Invisível",desc:"Você antecipa as necessidades de todos — sabe onde está a chave, prepara a comida favorita deles. Mas quando você está esgotada ou doente, ninguém percebe. Você precisa pedir explicitamente um copo d'água."},
-  {titulo:"O Peso Matinal no Peito",desc:"Você dorme 8 horas mas acorda sentindo um bloco de concreto no centro do peito. Sua primeira emoção do dia não é esperança. É um suspiro de resignação."},
-  {titulo:"O Caixa Eletrônico Financeiro",desc:"O dinheiro entra na sua mão e sai imediatamente para pagar contas ou ajudar alguém. Todo mundo saca. Ninguém deposita. Você funciona como um caixa eletrônico emocional e financeiro ao mesmo tempo."}
+  {titulo:"El Síndrome del Sofá Culpable",desc:"Te sientas a descansar a las 9 de la noche, pero no puedes. Sientes una 'electricidad' en el estómago, como si estuvieras olvidando hacer algo para alguien. Tu cuerpo ha desaprendido a descansar sin culpa."},
+  {titulo:"El Bruxismo del Silencio",desc:"Despiertas con la mandíbula trabada y tensión en la base del cuello. El médico dice que es estrés. Pero son todas las veces que te tragaste lo que querías decir para no arruinar el ambiente."},
+  {titulo:"La Caja Fuerte Invisible",desc:"Anticipas las necesidades de todos — sabes dónde está la llave, preparas su comida favorita. Pero cuando estás agotada o enferma, nadie se da cuenta. Necesitas pedir explícitamente un vaso de agua."},
+  {titulo:"El Peso Matutino en el Pecho",desc:"Duermes 8 horas pero despiertas sintiendo un bloque de concreto en el centro del pecho. Tu primera emoción del día no es esperanza. Es un suspiro de resignación."},
+  {titulo:"El Cajero Automático Financiero",desc:"El dinero entra en tu mano y sale inmediatamente para pagar cuentas o ayudar a alguien. Todos sacan. Nadie deposita. Funcionas como un cajero automático emocional y financiero al mismo tiempo."}
 ];
 
 const TERAPIA_IMGS = {1: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200&h=200&fit=crop&q=60", 2: "https://images.unsplash.com/photo-1508672019048-805c876b67e2?w=200&h=200&fit=crop&q=60", 3: "https://images.unsplash.com/photo-1545558014-8692077e9b5c?w=200&h=200&fit=crop&q=60", 4: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=200&h=200&fit=crop&q=60", 5: "https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?w=200&h=200&fit=crop&q=60", 6: "https://images.unsplash.com/photo-1600618528240-fb9fc964b853?w=200&h=200&fit=crop&q=60", 7: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=200&h=200&fit=crop&q=60", 8: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=200&h=200&fit=crop&q=60", 9: "https://images.unsplash.com/photo-1552196563-55cd4e45efb3?w=200&h=200&fit=crop&q=60", 10: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=200&fit=crop&q=60", 11: "https://images.unsplash.com/photo-1604480132736-44c188fe4d20?w=200&h=200&fit=crop&q=60", 12: "https://images.unsplash.com/photo-1487530811015-780c01a65f1d?w=200&h=200&fit=crop&q=60", 13: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&h=200&fit=crop&q=60", 14: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=200&h=200&fit=crop&q=60", 15: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=200&h=200&fit=crop&q=60", 16: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=200&h=200&fit=crop&q=60", 17: "https://images.unsplash.com/photo-1593811167562-9cef47bfc4d7?w=200&h=200&fit=crop&q=60", 18: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&q=60", 19: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=200&h=200&fit=crop&q=60", 20: "https://images.unsplash.com/photo-1471107340929-a87cd0f5b5f3?w=200&h=200&fit=crop&q=60", 21: "https://images.unsplash.com/photo-1517639493569-5666a7a3b2cc?w=200&h=200&fit=crop&q=60", 22: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=200&h=200&fit=crop&q=60", 23: "https://images.unsplash.com/photo-1562887245-66a43f5b4bab?w=200&h=200&fit=crop&q=60", 24: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=200&h=200&fit=crop&q=60", 25: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=200&h=200&fit=crop&q=60", 26: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=200&h=200&fit=crop&q=60"};
@@ -773,20 +773,20 @@ const AUDIO_SECTIONS = [
 ];
 
 const MOTIVACIONAIS = [
-  "Hoje você não precisa resolver nada. Só precisa <strong>sentir.</strong>",
-  "O esgotamento que você sente não é fraqueza. É o sinal de que <strong>já é suficiente.</strong>",
-  "Você dá tanto em silêncio. Hoje, esse silêncio se transforma em <strong>poder.</strong>",
-  "Cada prática que você completa diz ao seu campo energético: <strong>eu me escolho primeiro.</strong>",
-  "Você não precisa ser perfeita para merecer descanso. <strong>Você merece pelo simples fato de existir.</strong>",
-  "A ferida não define quem você é. Define <strong>quanto espaço você tem para curar.</strong>",
-  "Hoje, só uma coisa: <strong>coloque a mão no peito. Sinta seu coração bater. Isso é suficiente.</strong>",
+  "Hoy no necesitas resolver nada. Solo necesitas <strong>sentir.</strong>",
+  "El agotamiento que sientes no es debilidad. Es la señal de que <strong>ya es suficiente.</strong>",
+  "Das tanto en silencio. Hoy, ese silencio se transforma en <strong>poder.</strong>",
+  "Cada práctica que completas le dice a tu campo energético: <strong>me elijo primero.</strong>",
+  "No necesitas ser perfecta para merecer descanso. <strong>Mereces por el simple hecho de existir.</strong>",
+  "La herida no define quién eres. Define <strong>cuánto espacio tienes para sanar.</strong>",
+  "Hoy, solo una cosa: <strong>pon la mano en el pecho. Siente tu corazón latir. Eso es suficiente.</strong>",
 ];
 
 const WEEKLY_CHALLENGES = [
-  {semana:1,desafio:"7 dias sem se desculpar por existir",recompensa:"Badge 'Eu Existo'",tracker:"diasSemDesculpas",pontos:50},
-  {semana:2,desafio:"Dizer 'não' 3 vezes esta semana",recompensa:"Badge 'Limites Dourados'",tracker:"vezesDitoNao",pontos:30},
-  {semana:3,desafio:"Fazer algo só por você 5 vezes",recompensa:"Badge 'Autocuidado'",tracker:"vezesAutocuidado",pontos:40},
-  {semana:4,desafio:"Completar todas as práticas da semana",recompensa:"Badge 'Dedicação'",tracker:"praticasCompletas",pontos:60}
+  {semana:1,desafio:"7 días sin disculparte por existir",recompensa:"Badge 'Yo Existo'",tracker:"diasSemDesculpas",pontos:50},
+  {semana:2,desafio:"Decir 'no' 3 veces esta semana",recompensa:"Badge 'Límites Dorados'",tracker:"vezesDitoNao",pontos:30},
+  {semana:3,desafio:"Hacer algo solo por ti 5 veces",recompensa:"Badge 'Autocuidado'",tracker:"vezesAutocuidado",pontos:40},
+  {semana:4,desafio:"Completar todas las prácticas de la semana",recompensa:"Badge 'Dedicación'",tracker:"praticasCompletas",pontos:60}
 ];
 
 function getMoonPhase(){
@@ -931,7 +931,7 @@ function renderEnergyBar(){
 }
 
 function renderDiario(){
-  const today = new Date().toLocaleDateString('pt-BR', {day:'numeric', month:'long', year:'numeric'});
+  const today = new Date().toLocaleDateString('es-LA', {day:'numeric', month:'long', year:'numeric'});
   if(document.getElementById('diario-date')) {
     document.getElementById('diario-date').textContent = today.toUpperCase();
   }
@@ -948,21 +948,21 @@ function renderDiario(){
   const currentDay = getCurrentDay();
   const currentPhase = currentDay <= 7 ? 1 : currentDay <= 14 ? 2 : currentDay <= 21 ? 3 : 4;
   const questions = {
-    1: "O que você sentiu ao dizer 'não' hoje?",
-    2: "Qual energia você devolveu hoje?",
-    3: "O que você mereceu hoje?",
-    4: "Como você se sente diferente de quando começou?"
+    1: "¿Qué sentiste al decir 'no' hoy?",
+    2: "¿Qué energía devolviste hoy?",
+    3: "¿Qué mereciste hoy?",
+    4: "¿Cómo te sientes diferente de cuando comenzaste?"
   };
   
   if(document.getElementById('diario-question')) {
-    document.getElementById('diario-question').textContent = questions[currentPhase] || "Como você se sente hoje?";
+    document.getElementById('diario-question').textContent = questions[currentPhase] || "¿Cómo te sientes hoy?";
   }
   
   // Entradas anteriores
   if(document.getElementById('diario-entries')) {
     const entries = state.diaryEntries || [];
     if(entries.length === 0) {
-      document.getElementById('diario-entries').innerHTML = '<p style="text-align:center;color:var(--dim);padding:40px 20px">Ainda não há entradas. Comece escrevendo hoje!</p>';
+      document.getElementById('diario-entries').innerHTML = '<p style="text-align:center;color:var(--dim);padding:40px 20px">Aún no hay entradas. ¡Comienza escribiendo hoy!</p>';
     } else {
       document.getElementById('diario-entries').innerHTML = entries.slice().reverse().map(entry=>`
         <div class="diario-entry-item">
@@ -990,7 +990,7 @@ function saveDiaryEntry(){
   }
   
   const entry = {
-    date: new Date().toLocaleDateString('pt-BR'),
+    date: new Date().toLocaleDateString('es-LA'),
     emotion: selectedEmotionIndex !== null ? document.getElementById('emotion-'+selectedEmotionIndex).textContent : '✨',
     text: text,
     timestamp: Date.now()
@@ -1109,7 +1109,7 @@ function renderBadges(){
 }
 
 function renderCartas(){
-  const roles = ['1ª Carta · Raiz','2ª Carta · Diagnóstico','3ª Carta · Caminho'];
+  const roles = ['1ª Carta · Raíz','2ª Carta · Diagnóstico','3ª Carta · Camino'];
   const c = document.getElementById('cartas-display');
   c.innerHTML = (state.cards.length?state.cards:[{emoji:'🌙',name:'A Lua'},{emoji:'🗼',name:'A Torre'},{emoji:'⭐',name:'A Estrela'}]).map((card,i)=>
     `<div class="carta-display">
@@ -1195,11 +1195,11 @@ function toggleSinal(i,el){
   // Mensagens progressivas
   const count = state.checkedSinais.length;
   const messages = {
-    1: '✦ O mapa reconhece sua ferida',
-    2: '✨ Você está vendo os padrões com clareza',
-    3: '💫 A consciência é o primeiro passo da cura',
-    4: '🌟 Você está mapeando sua transformação',
-    5: '👑 Todos os sinais reconhecidos. Você está pronta para curar.'
+    1: '✦ El mapa reconoce tu herida',
+    2: '✨ Estás viendo los patrones con claridad',
+    3: '💫 La consciencia es el primer paso de la sanación',
+    4: '🌟 Estás mapeando tu transformación',
+    5: '👑 Todos los signos reconocidos. Estás lista para sanar.'
   };
   
   if(checked && messages[count]) {
@@ -1208,7 +1208,7 @@ function toggleSinal(i,el){
     // Efeito especial quando marca todos
     if(count === 5) {
       setTimeout(() => {
-        showToast('🎉 Seu mapa está completo e personalizado para você!', true);
+        showToast('🎉 ¡Tu mapa está completo y personalizado para ti!', true);
         // Bônus de energia por completar todos
         state.energyLevel = Math.min(100, (state.energyLevel || 100) + 10);
         state.points += 25;
@@ -1227,10 +1227,10 @@ function toggleSinal(i,el){
 // ── PLAN ──
 function renderPlan(){
   const phases = [
-    {num:1,nome:'Estagnação da Fuga',dias:'Dias 1–7',foco:'Foco somático · Esforço zero',color:'var(--gold)'},
-    {num:2,nome:'Purificação e Limite',dias:'Dias 8–14',foco:'Foco em pedir e dizer não',color:'var(--red)'},
-    {num:3,nome:'Recalibração Magnética',dias:'Dias 15–21',foco:'Foco em merecimento',color:'var(--blue)'},
-    {num:4,nome:'A Nova Frequência',dias:'Dias 22–30',foco:'Blindagem e renascimento',color:'var(--green)'},
+    {num:1,nome:'Estancamiento de la Fuga',dias:'Días 1–7',foco:'Enfoque somático · Esfuerzo cero',color:'var(--gold)'},
+    {num:2,nome:'Purificación y Límite',dias:'Días 8–14',foco:'Enfoque en pedir y decir no',color:'var(--red)'},
+    {num:3,nome:'Recalibración Magnética',dias:'Días 15–21',foco:'Enfoque en merecimiento',color:'var(--blue)'},
+    {num:4,nome:'La Nueva Frecuencia',dias:'Días 22–30',foco:'Blindaje y renacimiento',color:'var(--green)'},
   ];
   const container = document.getElementById('phases-container');
   container.innerHTML = phases.map(ph=>{
@@ -1240,7 +1240,7 @@ function renderPlan(){
       const isToday = d.dia === getCurrentDay();
       const locked = d.dia > getCurrentDay() && !completed;
       return `<div class="day-cell ${completed?'completed':''} ${isToday?'today':''} ${locked?'locked':''}"
-        onclick="${locked?'':'openDay('+d.dia+')'}" title="Dia ${d.dia}">
+        onclick="${locked?'':'openDay('+d.dia+')'}" title="Día ${d.dia}">
         ${d.dia}
       </div>`;
     }).join('');
@@ -1331,7 +1331,7 @@ function updateStreak(){
   }
   state.streak = streak;
   if(document.getElementById('streak-display')) {
-    document.getElementById('streak-display').textContent = streak;
+  document.getElementById('streak-display').textContent = streak;
   }
   
   // Bônus de energia por streak
@@ -1844,11 +1844,11 @@ function goPage(name, btn){
   const page = document.getElementById('page-'+name);
   if(page) {
     page.classList.add('active');
-    if(btn) btn.classList.add('active');
-    if(name==='mapa') animateRadar();
+  if(btn) btn.classList.add('active');
+  if(name==='mapa') animateRadar();
     if(name==='diario') renderDiario();
     if(name==='arvore') renderArvore();
-    window.scrollTo(0,0);
+  window.scrollTo(0,0);
   }
 }
 

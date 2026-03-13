@@ -1271,15 +1271,15 @@ function openDay(dayNum){
   const day = DAYS[dayNum-1]; if(!day) return;
   currentModalDay = dayNum;
   const completed = state.completedDays.includes(dayNum);
-  document.getElementById('modal-day-label').textContent = '✦ DIA '+dayNum+' DE 30';
+  document.getElementById('modal-day-label').textContent = '✦ DÍA '+dayNum+' DE 30';
   document.getElementById('modal-title').textContent = day.nome;
   document.getElementById('modal-subtitle').textContent = day.subtitulo;
   document.getElementById('modal-duration').innerHTML = '⏱ '+day.dur;
   document.getElementById('modal-instruction').innerHTML = day.instruccion;
-  document.getElementById('modal-why').textContent = 'Por que funciona? '+day.por;
+  document.getElementById('modal-why').textContent = '¿Por qué funciona? '+day.por;
   const btn = document.getElementById('btn-complete');
-  if(completed){ btn.textContent='✓ Concluída'; btn.classList.add('done'); }
-  else { btn.textContent='✦ Marcar como concluída'; btn.classList.remove('done'); }
+  if(completed){ btn.textContent='✓ Concluida'; btn.classList.add('done'); }
+  else { btn.textContent='✦ Marcar como concluida'; btn.classList.remove('done'); }
   document.getElementById('day-modal').classList.remove('hidden');
   document.body.style.overflow='hidden';
 }
@@ -1310,14 +1310,14 @@ function completeDay(){
   updateStreak();
   saveState();
   
-  document.getElementById('btn-complete').textContent='✓ Concluída';
+  document.getElementById('btn-complete').textContent='✓ Concluida';
   document.getElementById('btn-complete').classList.add('done');
   renderHero(); renderBadges(); renderPlan();
   if(typeof renderEnergyBar === 'function') renderEnergyBar();
-  showToast('✦ Dia '+currentModalDay+' concluído — muito bem', true);
+  showToast('✦ Día '+currentModalDay+' concluido — muy bien', true);
   // Check badges
   const completed = state.completedDays.length;
-  BADGES.forEach(b=>{ if(completed===b.req) setTimeout(()=>showToast('🏆 Conquista desbloqueada: '+b.nome,true),1500); });
+  BADGES.forEach(b=>{ if(completed===b.req) setTimeout(()=>showToast('🏆 Logro desbloqueado: '+b.nome,true),1500); });
   setTimeout(closeModal,1200);
 }
 
@@ -1343,7 +1343,7 @@ function updateStreak(){
 
 function updateLevel(){
   const levelThresholds = [0, 300, 600, 900, 1200];
-  const levelNames = ['Semente', 'Broto', 'Árvore', 'Floresta', 'Sagrada'];
+  const levelNames = ['Semilla', 'Brote', 'Árbol', 'Bosque', 'Sagrada'];
   const levelIcons = ['🌱', '🌿', '🌳', '🌲', '✨'];
   
   for(let i = levelThresholds.length - 1; i >= 0; i--) {

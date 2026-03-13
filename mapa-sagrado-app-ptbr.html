@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Mapa Sagrado de Cura</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06080f;
+  --surface:#0c1020;
+  --surface2:#111828;
+  --border:rgba(255,255,255,0.07);
+  --gold:#c9a84c;--gold2:#e8c97a;--gold-dim:rgba(201,168,76,0.15);
+  --cream:#f0e6d0;--dim:rgba(240,230,208,0.45);--dim2:rgba(240,230,208,0.25);
+  --red:#e05555;--green:#4caf87;--blue:#4c7ac9;
+  --r:0px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--cream);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* CANVAS STARS */
+#starfield{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.6}
+
+/* LAYOUT */
+.app{position:relative;z-index:1;display:flex;flex-direction:column;min-height:100vh;max-width:480px;margin:0 auto}
+
+/* ── ONBOARDING ── */
+#onboarding{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center}
+.ob-step{display:none;flex-direction:column;align-items:center;gap:24px;width:100%;max-width:360px;animation:fadeUp .5s ease both}
+.ob-step.active{display:flex}
+.ob-symbol{font-size:48px;animation:floatY 3s ease infinite}
+.ob-title{font-family:'Cinzel',serif;font-size:22px;color:var(--cream);line-height:1.4}
+.ob-sub{font-size:15px;color:var(--dim);line-height:1.8}
+.ob-input{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:16px;padding:14px 18px;outline:none;text-align:center}
+.ob-input::placeholder{color:var(--dim2)}
+.ob-input:focus{border-color:rgba(201,168,76,0.4)}
+.ob-cards{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.ob-card{width:80px;cursor:pointer;transition:transform .2s;text-align:center}
+.ob-card:hover{transform:translateY(-4px)}
+.ob-card.selected{outline:2px solid var(--gold);outline-offset:3px}
+.ob-card-img{font-size:32px;display:block;margin-bottom:6px;
+  background:linear-gradient(135deg,#1a1035,#0d0820);
+  border:1px solid rgba(201,168,76,0.2);padding:16px 12px;}
+.ob-card-name{font-size:10px;color:var(--dim);font-family:'Cinzel',serif;letter-spacing:1px}
+.btn-ob{width:100%;padding:16px;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#0a0810;font-family:'Cinzel',serif;font-size:13px;letter-spacing:2px;
+  text-transform:uppercase;border:none;cursor:pointer;transition:all .2s}
+.btn-ob:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,0.3)}
+.btn-ob:disabled{opacity:.4;cursor:default;transform:none}
+.ob-dots{display:flex;gap:8px}
+.ob-dot{width:6px;height:6px;border-radius:50%;background:var(--border)}
+.ob-dot.active{background:var(--gold)}
+
+/* ── TOP BAR ── */
+.topbar{padding:16px 20px 0;display:flex;justify-content:space-between;align-items:center}
+.topbar-logo{font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;color:var(--gold);opacity:.8}
+.topbar-streak{display:flex;align-items:center;gap:6px;background:rgba(201,168,76,0.08);
+  border:1px solid rgba(201,168,76,0.2);padding:6px 12px;border-radius:4px}
+.streak-num{font-family:'Cinzel',serif;font-size:16px;color:var(--gold2)}
+.streak-label{font-size:10px;color:var(--dim)}
+.energy-bar-wrap{width:100%;background:rgba(255,255,255,0.05);height:6px;border-radius:3px;overflow:hidden;position:relative;margin-top:8px}
+.energy-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width 0.5s ease;border-radius:3px}
+.energy-bar-text{position:absolute;top:-20px;right:0;font-size:9px;color:var(--dim);font-family:'Cinzel',serif}
+.level-badge{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--gold);font-family:'Cinzel',serif}
+
+/* ── HERO DASHBOARD ── */
+.hero{padding:24px 20px 0}
+.hero-greeting{font-size:13px;color:var(--dim);margin-bottom:6px}
+.hero-name{font-family:'Cormorant Garamond',serif;font-size:clamp(26px,6vw,34px);font-weight:300;line-height:1.2;margin-bottom:4px}
+.hero-name em{font-style:italic;color:var(--gold2)}
+.hero-herida{font-size:12px;color:var(--gold);font-family:'Cinzel',serif;letter-spacing:2px;opacity:.8;margin-bottom:24px}
+
+/* PROGRESSO CIRCULAR */
+.progress-ring-wrap{display:flex;gap:20px;align-items:center;margin-bottom:24px}
+.ring-container{position:relative;width:96px;height:96px;flex-shrink:0}
+.ring-container svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:rgba(255,255,255,0.06);stroke-width:6}
+.ring-fill{fill:none;stroke:var(--gold);stroke-width:6;stroke-linecap:round;
+  stroke-dasharray:264;transition:stroke-dashoffset 1s ease}
+.ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.ring-day{font-family:'Cinzel',serif;font-size:20px;color:var(--gold2);line-height:1}
+.ring-label{font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.ring-info{flex:1}
+.ring-info-title{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--cream);line-height:1.3;margin-bottom:6px}
+.ring-info-sub{font-size:12px;color:var(--dim);line-height:1.6}
+
+/* DIA ATUAL CARD */
+.today-card{background:linear-gradient(135deg,rgba(201,168,76,0.1),rgba(201,168,76,0.04));
+  border:1px solid rgba(201,168,76,0.25);border-top:2px solid var(--gold);
+  padding:20px;margin-bottom:20px;cursor:pointer;transition:all .2s}
+.today-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(201,168,76,0.15)}
+.today-eyebrow{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;
+  color:var(--gold);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.today-pulse{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 1.5s ease infinite}
+.today-title{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--cream);margin-bottom:4px}
+.today-duration{font-size:12px;color:var(--dim)}
+.today-arrow{float:right;color:var(--gold);font-size:18px;margin-top:-28px}
+
+/* BADGES ROW */
+.badges-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:24px;scrollbar-width:none}
+.badges-row::-webkit-scrollbar{display:none}
+.badge{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 14px;
+  background:var(--surface);border:1px solid var(--border);min-width:72px;transition:all .2s}
+.badge.unlocked{border-color:rgba(201,168,76,0.3);background:rgba(201,168,76,0.06)}
+.badge.locked{opacity:.35;filter:grayscale(1)}
+.badge-icon{font-size:22px}
+.badge-name{font-size:9px;color:var(--dim);text-align:center;font-family:'Cinzel',serif;letter-spacing:.5px;line-height:1.3}
+.badge.unlocked .badge-name{color:var(--gold)}
+
+/* ── NAV TABS ── */
+.nav{position:sticky;bottom:0;z-index:50;background:rgba(6,8,15,0.95);
+  backdrop-filter:blur(12px);border-top:1px solid var(--border);
+  display:grid;grid-template-columns:repeat(4,1fr)}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:12px 8px;border:none;background:none;cursor:pointer;transition:all .2s;
+  color:var(--dim);-webkit-tap-highlight-color:transparent}
+.nav-btn.active{color:var(--gold)}
+.nav-btn svg{width:22px;height:22px}
+.nav-label{font-size:9px;letter-spacing:.5px;font-family:'Cinzel',serif}
+
+/* ── PAGES ── */
+.page{display:none;flex:1;padding:20px 20px 80px;animation:fadeUp .3s ease both}
+.page.active{display:block}
+
+/* PAGE HEADER */
+.page-header{margin-bottom:20px}
+.page-eyebrow{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;
+  color:var(--dim);text-transform:uppercase;margin-bottom:6px;opacity:.7}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,5vw,28px);
+  font-weight:300;line-height:1.3;color:var(--cream)}
+.page-title em{font-style:italic;color:var(--gold2)}
+
+/* SECTION LABEL */
+.sec-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;
+  color:var(--dim);text-transform:uppercase;margin:24px 0 12px;
+  display:flex;align-items:center;gap:10px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── MAPA PAGE ── */
+.cartas-row{display:flex;gap:12px;margin-bottom:24px;justify-content:center}
+.carta-display{flex:1;max-width:110px;text-align:center;
+  background:linear-gradient(135deg,#1a1035,#0d0820);
+  border:1px solid rgba(201,168,76,0.2);padding:20px 12px 14px;
+  animation:floatY 4s ease infinite}
+.carta-display:nth-child(2){animation-delay:.8s}
+.carta-display:nth-child(3){animation-delay:1.6s}
+.carta-emoji{font-size:28px;display:block;margin-bottom:8px}
+.carta-name{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--gold);margin-bottom:2px}
+.carta-role{font-size:10px;color:var(--dim2)}
+
+/* RADAR CHART */
+.radar-wrap{background:var(--surface);border:1px solid var(--border);padding:20px;margin-bottom:16px}
+.radar-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gold);
+  text-transform:uppercase;text-align:center;margin-bottom:16px;opacity:.8}
+.radar-bars{display:flex;flex-direction:column;gap:10px}
+.radar-bar-row{display:flex;align-items:center;gap:10px}
+.radar-bar-label{font-size:11px;color:var(--dim);width:90px;flex-shrink:0}
+.radar-bar-track{flex:1;height:6px;background:rgba(255,255,255,0.05);border-radius:0}
+.radar-bar-fill{height:100%;border-radius:0;transition:width 1.5s ease}
+.radar-bar-val{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);width:32px;text-align:right}
+
+/* SINAIS CHECKLIST */
+.sinais-progress{background:var(--surface);border:1px solid var(--border);padding:16px;margin-bottom:20px;border-radius:4px}
+.sinais-progress-text{font-size:11px;color:var(--dim);margin-bottom:8px;display:flex;justify-content:space-between}
+.sinais-progress-bar{height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden}
+.sinais-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width 0.5s ease;border-radius:2px}
+.sinal-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:all .2s;position:relative}
+.sinal-item:last-child{border-bottom:none}
+.sinal-item:hover{background:rgba(255,255,255,0.02);padding-left:4px}
+.sinal-item.checked{background:rgba(201,168,76,0.05);border-left:3px solid var(--gold);padding-left:12px}
+.sinal-check{width:22px;height:22px;border:2px solid rgba(255,255,255,0.3);
+  flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;
+  transition:all .3s ease;border-radius:4px;position:relative}
+.sinal-item.checked .sinal-check{background:var(--gold);border-color:var(--gold);color:#0a0810;font-size:14px;
+  transform:scale(1.1);box-shadow:0 0 12px rgba(201,168,76,0.4)}
+.sinal-check::before{content:'';position:absolute;inset:-4px;border:2px solid var(--gold);border-radius:4px;
+  opacity:0;transition:opacity .3s}
+.sinal-item.checked .sinal-check::before{opacity:1;animation:pulse-ring 0.6s ease}
+.sinal-body{flex:1}
+.sinal-title{font-size:14px;color:var(--cream);margin-bottom:3px;line-height:1.4;transition:color .2s}
+.sinal-item.checked .sinal-title{color:var(--gold2)}
+.sinal-desc{font-size:12px;color:var(--dim);line-height:1.6}
+.sinal-item.checked .sinal-desc{color:rgba(240,230,208,0.6)}
+@keyframes pulse-ring{0%{transform:scale(1);opacity:1}100%{transform:scale(1.5);opacity:0}}
+
+/* BODY MAP */
+.body-map{background:var(--surface);border:1px solid var(--border);padding:20px;text-align:center;margin-bottom:16px}
+.body-svg-wrap{position:relative;display:inline-block}
+
+/* ── PLAN PAGE ── */
+.plan-phase{margin-bottom:24px}
+.phase-header{display:flex;align-items:center;gap:12px;padding:14px 16px;
+  background:var(--surface);border-left:3px solid var(--gold);margin-bottom:2px;cursor:pointer}
+.phase-num{font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;color:var(--gold);
+  background:rgba(201,168,76,0.1);padding:4px 8px}
+.phase-name{font-size:14px;color:var(--cream);flex:1}
+.phase-days{font-size:11px;color:var(--dim)}
+.phase-toggle{color:var(--dim);font-size:16px;transition:transform .2s}
+.phase-header.open .phase-toggle{transform:rotate(180deg)}
+
+.days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:4px 0}
+.day-cell{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-size:10px;cursor:pointer;transition:all .2s;
+  border:1px solid transparent;position:relative}
+.day-cell.completed{background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.2);color:var(--gold)}
+.day-cell.completed::after{content:'✓';position:absolute;top:2px;right:3px;font-size:7px;color:var(--gold)}
+.day-cell.today{background:rgba(201,168,76,0.2);border-color:var(--gold);color:var(--gold2)}
+.day-cell.locked{color:var(--dim2);opacity:.4}
+.day-cell:hover:not(.locked){background:rgba(255,255,255,0.05)}
+
+/* DAY MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.85);
+  display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s ease}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--surface);border-top:2px solid var(--gold);width:100%;
+  max-width:480px;max-height:85vh;overflow-y:auto;padding:28px 24px 40px;
+  animation:slideUp .3s ease}
+.modal-close{float:right;background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer;margin-top:-4px}
+.modal-day{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--gold);margin-bottom:8px}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--cream);margin-bottom:4px}
+.modal-subtitle{font-size:13px;color:var(--gold2);font-style:italic;margin-bottom:20px}
+.modal-instruction{background:rgba(201,168,76,0.04);border-left:2px solid var(--gold);
+  padding:16px;font-size:14px;line-height:1.9;color:var(--dim);margin-bottom:16px}
+.modal-instruction strong{color:var(--cream)}
+.modal-why{font-size:12px;color:var(--dim2);line-height:1.7;font-style:italic;margin-bottom:20px}
+.modal-duration{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim);margin-bottom:20px}
+.btn-complete{width:100%;padding:16px;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#0a0810;font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;
+  text-transform:uppercase;border:none;cursor:pointer;transition:all .2s}
+.btn-complete.done{background:rgba(76,175,135,0.2);color:var(--green);border:1px solid var(--green);cursor:default}
+
+/* ── AUDIO PAGE ── */
+.audio-card{background:linear-gradient(135deg,#1a1035,#0d0820);border:1px solid rgba(201,168,76,0.2);padding:28px 24px;margin-bottom:20px}
+.audio-cartas{display:flex;justify-content:center;gap:16px;margin-bottom:20px}
+.audio-carta{font-size:24px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.15)}
+.audio-title{font-family:'Cormorant Garamond',serif;font-size:22px;text-align:center;margin-bottom:4px}
+.audio-sub{font-size:12px;color:var(--dim);text-align:center;margin-bottom:24px}
+/* FAKE PLAYER */
+.player{background:rgba(0,0,0,0.3);padding:20px;border:1px solid var(--border)}
+.player-waveform{display:flex;align-items:center;gap:2px;height:40px;margin-bottom:16px;justify-content:center}
+.wave-bar{width:3px;background:var(--gold);opacity:.4;border-radius:0;transition:height .3s}
+.player-controls{display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:14px}
+.player-btn{background:none;border:none;color:var(--dim);cursor:pointer;font-size:20px;transition:color .2s}
+.player-btn.play{width:48px;height:48px;border-radius:50%;background:var(--gold);color:#0a0810;
+  font-size:18px;display:flex;align-items:center;justify-content:center}
+.player-btn:hover{color:var(--gold)}
+.player-progress{height:3px;background:rgba(255,255,255,0.08);margin-bottom:10px;cursor:pointer}
+.player-bar{height:100%;background:var(--gold);width:0%;transition:width .3s}
+.player-time{display:flex;justify-content:space-between;font-size:10px;color:var(--dim);font-family:'Cinzel',serif}
+
+/* AUDIO SECTIONS */
+.audio-section{display:flex;gap:12px;align-items:center;padding:12px 0;
+  border-bottom:1px solid var(--border);cursor:pointer;transition:all .2s}
+.audio-section:last-child{border-bottom:none}
+.audio-section:hover{padding-left:4px}
+.audio-section-time{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);
+  width:44px;flex-shrink:0}
+.audio-section-title{font-size:13px;color:var(--cream)}
+.audio-section-sub{font-size:11px;color:var(--dim)}
+.audio-section-play{margin-left:auto;color:var(--dim);font-size:14px}
+
+/* ── TERAPIAS PAGE ── */
+.filter-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:20px;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-btn{flex-shrink:0;padding:6px 14px;border:1px solid var(--border);
+  background:none;color:var(--dim);font-family:'Cinzel',serif;font-size:9px;
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;
+  border-radius:2px}
+.filter-btn.active{background:rgba(201,168,76,0.15);border-color:var(--gold);color:var(--gold)}
+
+.terapias-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.terapia-card{background:var(--surface);border:1px solid var(--border);
+  cursor:pointer;transition:all .2s;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;border-radius:4px}
+.terapia-card:hover{border-color:rgba(201,168,76,0.4);transform:translateY(-2px);
+  box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+.terapia-card.done{border-color:rgba(76,175,135,0.4);background:rgba(76,175,135,0.05)}
+.terapia-card.fav{border-color:rgba(201,168,76,0.35)}
+/* Emoji no topo */
+.terapia-emoji-wrap{position:relative;width:100%;padding:24px 16px 16px;overflow:hidden;flex-shrink:0;
+  background:var(--surface2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.terapia-emoji{font-size:40px;display:flex;align-items:center;justify-content:center;
+  transition:transform .3s ease;line-height:1}
+.terapia-card:hover .terapia-emoji{transform:scale(1.1)}
+.terapia-img-type{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1.5px;
+  color:rgba(201,168,76,0.7);text-transform:uppercase;margin-top:auto}
+.terapia-img-dur{font-size:9px;color:rgba(240,230,208,0.5);font-family:'Cinzel',serif;
+  position:absolute;top:8px;right:8px}
+/* Conteúdo abaixo */
+.terapia-body{padding:14px 12px;flex:1;text-align:center}
+.terapia-name{font-size:12px;color:var(--cream);line-height:1.3;font-weight:400}
+/* Badges */
+.terapia-done-badge{position:absolute;top:8px;right:8px;
+  background:rgba(76,175,135,0.85);color:#fff;font-size:10px;
+  width:20px;height:20px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;z-index:2}
+.terapia-fav{position:absolute;top:8px;right:8px;color:rgba(201,168,76,0.6);
+  font-size:14px;cursor:pointer;z-index:2;transition:color .2s;
+  background:rgba(0,0,0,0.3);width:24px;height:24px;
+  display:flex;align-items:center;justify-content:center;border-radius:50%}
+.terapia-fav:hover{color:var(--gold2)}
+.terapia-fav.active{color:var(--gold)}
+.terapia-card.done .terapia-fav{right:36px}
+/* Placeholder enquanto carrega */
+.terapia-img-placeholder{position:absolute;inset:0;background:var(--surface2);
+  display:flex;align-items:center;justify-content:center;font-size:24px;opacity:0.4}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(40px)}to{transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes waveAnim{0%,100%{height:6px}50%{height:24px}}
+
+/* NOTIFICATION TOAST */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);
+  background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);
+  padding:12px 24px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;
+  color:var(--gold);z-index:999;animation:fadeUp .3s ease;white-space:nowrap}
+.toast.hidden{display:none}
+.toast.success{background:rgba(76,175,135,0.1);border-color:rgba(76,175,135,0.3);color:var(--green)}
+
+/* MOTIVATIONAL */
+.motivacional{background:linear-gradient(135deg,rgba(201,168,76,0.06),transparent);
+  border:1px solid rgba(201,168,76,0.12);border-left:2px solid var(--gold);
+  padding:16px 18px;margin-bottom:20px}
+.motivacional-text{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;
+  color:var(--cream);line-height:1.7}
+.motivacional-text strong{font-style:normal;color:var(--gold2)}
+
+/* ── DIARIO PAGE ── */
+.diario-entry-form{background:var(--surface);border:1px solid var(--border);padding:20px;margin-bottom:24px}
+.diario-date{font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:16px}
+.diario-emotions{margin-bottom:16px}
+.emotion-picker{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.emotion-btn{width:48px;height:48px;border:1px solid var(--border);background:var(--surface2);
+  border-radius:50%;font-size:24px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.emotion-btn:hover{border-color:var(--gold);transform:scale(1.1)}
+.emotion-btn.selected{border-color:var(--gold);background:rgba(201,168,76,0.1)}
+.diario-text{width:100%;min-height:120px;background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  color:var(--cream);font-family:'DM Sans',sans-serif;font-size:14px;padding:14px;outline:none;resize:vertical;
+  line-height:1.6;margin-bottom:16px}
+.diario-text::placeholder{color:var(--dim2)}
+.diario-question{background:rgba(201,168,76,0.05);border-left:2px solid var(--gold);padding:12px;font-size:13px;
+  color:var(--dim);margin-bottom:16px;font-style:italic}
+.diario-entry-item{background:var(--surface);border:1px solid var(--border);padding:16px;margin-bottom:12px;
+  border-left:3px solid var(--gold)}
+.diario-entry-date{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--gold);margin-bottom:8px}
+.diario-entry-emotion{font-size:20px;margin-bottom:8px}
+.diario-entry-text{font-size:13px;color:var(--dim);line-height:1.7;white-space:pre-wrap}
+
+/* ── ARVORE PAGE ── */
+.arvore-container{text-align:center;padding:20px 0}
+.arvore-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:24px}
+.arvore-stat-card{background:var(--surface);border:1px solid var(--border);padding:16px;text-align:center}
+.arvore-stat-value{font-family:'Cinzel',serif;font-size:24px;color:var(--gold2);margin-bottom:4px}
+.arvore-stat-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+
+/* RESPONSIVE */
+@media(min-width:480px){.app{border-left:1px solid var(--border);border-right:1px solid var(--border)}}
+</style>
+</head>
+<body>
+<canvas id="starfield"></canvas>
+
+<!-- ONBOARDING -->
+<div id="onboarding">
+  <div class="ob-step active" id="ob1">
+    <div class="ob-symbol">🌙</div>
+    <h2 class="ob-title">Bem-vinda ao seu<br>Mapa Sagrado</h2>
+    <p class="ob-sub">Antes de começar, preciso te conhecer um pouco mais para personalizar a sua experiência.</p>
+    <input class="ob-input" id="ob-name" type="text" placeholder="Qual é o seu nome?" maxlength="30">
+    <div class="ob-dots"><div class="ob-dot active"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
+    <button class="btn-ob" id="btn-ob1" onclick="goOb(2)" disabled>Continuar ✦</button>
+  </div>
+
+  <div class="ob-step" id="ob2">
+    <div class="ob-symbol">✨</div>
+    <h2 class="ob-title">Escolha suas três cartas sagradas</h2>
+    <p class="ob-sub">Estas são as cartas que as estrelas revelaram para você.</p>
+    <div class="ob-cards" id="ob-cards">
+      <div class="ob-card" onclick="selectCard(this,'🌙','A Lua')">
+        <span class="ob-card-img">🌙</span><span class="ob-card-name">A Lua</span>
+      </div>
+      <div class="ob-card" onclick="selectCard(this,'☀️','O Sol')">
+        <span class="ob-card-img">☀️</span><span class="ob-card-name">O Sol</span>
+      </div>
+      <div class="ob-card" onclick="selectCard(this,'⭐','A Estrela')">
+        <span class="ob-card-img">⭐</span><span class="ob-card-name">A Estrela</span>
+      </div>
+      <div class="ob-card" onclick="selectCard(this,'🗼','A Torre')">
+        <span class="ob-card-img">🗼</span><span class="ob-card-name">A Torre</span>
+      </div>
+      <div class="ob-card" onclick="selectCard(this,'🌍','O Mundo')">
+        <span class="ob-card-img">🌍</span><span class="ob-card-name">O Mundo</span>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--dim)">Selecione exatamente 3 cartas</p>
+    <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot active"></div><div class="ob-dot"></div></div>
+    <button class="btn-ob" id="btn-ob2" onclick="goOb(3)" disabled>Continuar ✦</button>
+  </div>
+
+  <div class="ob-step" id="ob3">
+    <div class="ob-symbol">💫</div>
+    <h2 class="ob-title">Seu mapa está sendo<br>calibrado</h2>
+    <p class="ob-sub">Estamos alinhando seu diagnóstico com a frequência energética das suas cartas e sua bioenergia pessoal.</p>
+    <div id="ob-loading" style="width:100%;height:3px;background:var(--border);position:relative;overflow:hidden">
+      <div id="ob-bar" style="height:100%;background:var(--gold);width:0%;transition:width .1s"></div>
+    </div>
+    <p id="ob-status" style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gold);opacity:.7">ANALISANDO CARTAS...</p>
+    <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot active"></div></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="main-app" style="display:none">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">✦ MAPA SAGRADO</div>
+    <div class="topbar-streak">
+      <span>🔥</span>
+      <span class="streak-num" id="streak-display">0</span>
+      <span class="streak-label">dias</span>
+    </div>
+  </div>
+
+  <!-- PAGE: DASHBOARD -->
+  <div class="page active" id="page-home">
+    <div class="hero">
+      <div class="hero-greeting">Bem-vinda de volta,</div>
+      <div class="hero-name" id="hero-name">tu nombre</div>
+      <div class="hero-herida" id="hero-herida">✦ FERIDA DE VÍNCULO PROFUNDA ✦</div>
+
+      <div class="progress-ring-wrap">
+        <div class="ring-container">
+          <svg width="96" height="96" viewBox="0 0 96 96">
+            <circle class="ring-bg" cx="48" cy="48" r="42"/>
+            <circle class="ring-fill" id="ring-fill" cx="48" cy="48" r="42" stroke-dashoffset="264"/>
+          </svg>
+          <div class="ring-text">
+            <div class="ring-day" id="ring-day">1</div>
+            <div class="ring-label">de 30</div>
+          </div>
+        </div>
+        <div class="ring-info">
+          <div class="ring-info-title" id="ring-title">Primeira noite</div>
+          <div class="ring-info-sub">Hoje você completa sua primeira prática sagrada. O caminho começa esta noite.</div>
+        </div>
+      </div>
+
+      <div class="motivacional" id="motivacional">
+        <div class="motivacional-text" id="mot-text">"Hoje você não precisa resolver nada. Só precisa <strong>sentir.</strong>"</div>
+      </div>
+
+      <div class="moon-phase-card" id="moon-phase-card" style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.2);padding:16px;margin-bottom:20px;text-align:center">
+        <div style="font-size:32px;margin-bottom:8px" id="moon-emoji">🌙</div>
+        <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:4px" id="moon-name">Lua Nova</div>
+        <div style="font-size:12px;color:var(--dim)" id="moon-energy">Energia de Renovação</div>
+      </div>
+
+      <div class="today-card" onclick="openDay(getCurrentDay())">
+        <div class="today-eyebrow"><span class="today-pulse"></span> Sua prática de hoje</div>
+        <div class="today-title" id="today-title">O Selo de 432Hz</div>
+        <div class="today-duration" id="today-duration">⏱ 9 minutos · Antes de dormir</div>
+        <div class="today-arrow">→</div>
+      </div>
+
+      <div class="sec-label">Suas conquistas</div>
+      <div class="badges-row" id="badges-row"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px">
+        <div class="today-card" onclick="goPage('diario',null)" style="margin:0;cursor:pointer;padding:16px">
+          <div class="today-eyebrow" style="margin-bottom:8px">📖</div>
+          <div class="today-title" style="font-size:14px">Diário</div>
+          <div class="today-duration" style="font-size:10px">Seus registros</div>
+        </div>
+        <div class="today-card" onclick="goPage('arvore',null)" style="margin:0;cursor:pointer;padding:16px">
+          <div class="today-eyebrow" style="margin-bottom:8px">🌳</div>
+          <div class="today-title" style="font-size:14px">Árvore</div>
+          <div class="today-duration" style="font-size:10px">Seu progresso</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: MAPA -->
+  <div class="page" id="page-mapa">
+    <div class="page-header">
+      <div class="page-eyebrow">✦ Seu diagnóstico</div>
+      <div class="page-title">Seu <em>Mapa Energético</em><br>Pessoal</div>
+    </div>
+
+    <div class="cartas-row" id="cartas-display"></div>
+
+    <div class="radar-wrap">
+      <div class="radar-title">Padrão de Fuga Energética</div>
+      <div class="radar-bars">
+        <div class="radar-bar-row">
+          <div class="radar-bar-label">Vínculos</div>
+          <div class="radar-bar-track"><div class="radar-bar-fill" style="width:0%;background:var(--red)" data-w="90"></div></div>
+          <div class="radar-bar-val">90%</div>
+        </div>
+        <div class="radar-bar-row">
+          <div class="radar-bar-label">Finanças</div>
+          <div class="radar-bar-track"><div class="radar-bar-fill" style="width:0%;background:var(--gold)" data-w="70"></div></div>
+          <div class="radar-bar-val">70%</div>
+        </div>
+        <div class="radar-bar-row">
+          <div class="radar-bar-label">Energia vital</div>
+          <div class="radar-bar-track"><div class="radar-bar-fill" style="width:0%;background:var(--blue)" data-w="80"></div></div>
+          <div class="radar-bar-val">80%</div>
+        </div>
+        <div class="radar-bar-row">
+          <div class="radar-bar-label">Voz própria</div>
+          <div class="radar-bar-track"><div class="radar-bar-fill" style="width:0%;background:#9b59b6" data-w="85"></div></div>
+          <div class="radar-bar-val">85%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-label">Os 5 sinais da sua ferida</div>
+    <p style="font-size:12px;color:var(--dim);margin-bottom:14px;line-height:1.7">Marque os que você reconhece na sua vida. Cada um que marcar confirma que seu mapa foi construído especificamente para você.</p>
+    
+    <div class="sinais-progress" id="sinais-progress">
+      <div class="sinais-progress-text">
+        <span>Reconhecimento da ferida</span>
+        <span id="sinais-count">0/5</span>
+      </div>
+      <div class="sinais-progress-bar">
+        <div class="sinais-progress-fill" id="sinais-progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+    
+    <div id="sinais-list"></div>
+  </div>
+
+  <!-- PAGE: PLAN -->
+  <div class="page" id="page-plan">
+    <div class="page-header">
+      <div class="page-eyebrow">✦ Seu protocolo</div>
+      <div class="page-title">Plano de Cura<br><em>30 Dias</em></div>
+    </div>
+    <div id="phases-container"></div>
+  </div>
+
+  <!-- PAGE: AUDIO -->
+  <div class="page" id="page-audio">
+    <div class="page-header">
+      <div class="page-eyebrow">✦ Leitura sagrada</div>
+      <div class="page-title"><em>Áudio</em> das suas<br>3 Cartas</div>
+    </div>
+
+    <div class="audio-card">
+      <div class="audio-cartas" id="audio-cartas-display"></div>
+      <div class="audio-title">Interpretação Profunda</div>
+      <div class="audio-sub">30 minutos · Personalizado para sua ferida de vínculo</div>
+
+      <audio id="audio-player" preload="metadata" style="display:none;"></audio>
+      
+      <div class="player">
+        <div class="player-waveform" id="waveform"></div>
+        <div class="player-controls">
+          <button class="player-btn" onclick="seek(-15)">⏪</button>
+          <button class="player-btn play" id="play-btn" onclick="togglePlay()">▶</button>
+          <button class="player-btn" onclick="seek(15)">⏩</button>
+        </div>
+        <div class="player-progress" onclick="scrub(event)">
+          <div class="player-bar" id="player-bar"></div>
+        </div>
+        <div class="player-time">
+          <span id="time-current">0:00</span>
+          <span id="time-total">30:00</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-label">Seções do áudio</div>
+    <div id="audio-sections"></div>
+
+    <div class="motivacional" style="margin-top:20px">
+      <div class="motivacional-text">"Feche os olhos. Sei que você está cansada. Sua dor não é fraqueza — <strong>é preparação.</strong> Hoje vamos fechar essa fuga."</div>
+    </div>
+  </div>
+
+  <!-- PAGE: TERAPIAS -->
+  <div class="page" id="page-terapias">
+    <div class="page-header">
+      <div class="page-eyebrow">✦ Biblioteca sagrada</div>
+      <div class="page-title">Plataforma de<br><em>Terapias</em></div>
+    </div>
+    <div class="filter-row" id="filter-row"></div>
+    <div class="terapias-grid" id="terapias-grid"></div>
+  </div>
+
+  <!-- PAGE: DIARIO -->
+  <div class="page" id="page-diario">
+    <div class="page-header">
+      <div class="page-eyebrow">✦ Seu registro sagrado</div>
+      <div class="page-title">Diário de<br><em>Cura</em></div>
+    </div>
+    
+    <div class="diario-entry-form" id="diario-form">
+      <div class="diario-date" id="diario-date"></div>
+      <div class="diario-emotions">
+        <div class="sec-label">Como você se sente hoje?</div>
+        <div class="emotion-picker" id="emotion-picker"></div>
+      </div>
+      <textarea class="diario-text" id="diario-text" placeholder="Escreva seus insights, reflexões, ou apenas o que está em seu coração hoje..."></textarea>
+      <div class="diario-question" id="diario-question"></div>
+      <button class="btn-ob" onclick="saveDiaryEntry()">Salvar Entrada ✦</button>
+    </div>
+    
+    <div class="sec-label">Suas entradas</div>
+    <div id="diario-entries"></div>
+  </div>
+
+  <!-- PAGE: ARVORE -->
+  <div class="page" id="page-arvore">
+    <div class="page-header">
+      <div class="page-eyebrow">✦ Sua transformação</div>
+      <div class="page-title">Árvore de<br><em>Crescimento</em></div>
+    </div>
+    
+    <div class="arvore-container" id="arvore-container">
+      <svg id="arvore-svg" viewBox="0 0 200 300" style="width:100%;max-width:300px;margin:0 auto;display:block">
+        <!-- Raízes -->
+        <path id="raizes" d="M100,280 Q80,270 70,260 Q60,250 50,240" stroke="rgba(201,168,76,0.3)" stroke-width="2" fill="none"/>
+        <path d="M100,280 Q120,270 130,260 Q140,250 150,240" stroke="rgba(201,168,76,0.3)" stroke-width="2" fill="none"/>
+        <!-- Tronco -->
+        <rect id="tronco" x="95" y="200" width="10" height="80" fill="rgba(201,168,76,0.4)"/>
+        <!-- Galhos e folhas serão adicionados dinamicamente -->
+      </svg>
+      <div class="arvore-stats" id="arvore-stats"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="goPage('home',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      <span class="nav-label">Início</span>
+    </button>
+    <button class="nav-btn" onclick="goPage('mapa',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+      <span class="nav-label">Meu Mapa</span>
+    </button>
+    <button class="nav-btn" onclick="goPage('plan',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span class="nav-label">Meu Plano</span>
+    </button>
+    <button class="nav-btn" onclick="goPage('terapias',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+      <span class="nav-label">Terapias</span>
+    </button>
+  </nav>
+</div>
+
+<!-- DAY MODAL -->
+<div class="modal-overlay hidden" id="day-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-day" id="modal-day-label"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-subtitle" id="modal-subtitle"></div>
+    <div class="modal-duration" id="modal-duration"></div>
+    <div class="modal-instruction" id="modal-instruction"></div>
+    <div class="modal-why" id="modal-why"></div>
+    <button class="btn-complete" id="btn-complete" onclick="completeDay()"></button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast hidden" id="toast"></div>
+
+<script>
+// ═══════════════════════════════
+// DATA
+// ═══════════════════════════════
+const DAYS = [
+  {dia:1,fase:1,nome:"O Selo de 432Hz",subtitulo:"Sessão sonora para abrir o campo relacional bloqueado",dur:"9 minutos · Antes de dormir",instruccion:"Quando a casa estiver em silêncio e você estiver deitada na cama, <strong>coloque seus fones de ouvido e dê play na faixa de 432Hz.</strong><br><br>Coloque sua mão direita, plana e aquecida, exatamente no centro do peito. Feche os olhos.<br><br>No minuto 3, você sentirá um leve formigamento ou calor sob sua mão. No minuto 6, soltará um suspiro profundo — <strong>não reprima. É seu corpo expulsando o peso do dia.</strong>",por:"As ondas de 432Hz reduzem as frequências cerebrais de Beta (estresse) para Theta (receptividade). A mão no peito ativa o sistema nervoso parassimpático — avisa ao seu corpo que o perigo passou."},
+  {dia:2,fase:1,nome:"O Suspiro do Nervo Vago",subtitulo:"Reset do sistema nervoso ao acordar",dur:"3 minutos · Ao acordar",instruccion:"Ao abrir os olhos pela manhã, antes de olhar o celular, vá ao banheiro. <strong>Lave o rosto com água muito fria.</strong><br><br>Ao sentir o choque do frio, solte o ar pela boca fazendo um som longo e profundo: <strong>'Haaaa...'</strong><br><br>Repita 3 vezes.",por:"O choque térmico e o som ativam o nervo vago, cortando o loop de ansiedade matinal antes que o dia comece."},
+  {dia:3,fase:1,nome:"O Copo da Intenção",subtitulo:"Devolução energética enquanto você dorme",dur:"1 minuto · Antes de dormir",instruccion:"Coloque um copo de água na sua mesa de cabeceira.<br><br>Ponha as duas mãos ao redor do copo. Feche os olhos e diga baixinho ou mentalmente: <strong>'Toda a energia que entreguei hoje — volta para mim agora. Esta noite, eu sou a primeira.'</strong><br><br>Pela manhã, beba a água completa antes de falar com alguém.",por:"Psicomagia e ancoragem neural: o ritual cria uma intenção concreta que o subconsciente processa durante o sono REM."},
+  {dia:4,fase:1,nome:"A Barreira de Alecrim",subtitulo:"Proteção energética durante o sono",dur:"2 minutos · Ao preparar a cama",instruccion:"Pegue um raminho de alecrim seco ou fresco. <strong>Coloque embaixo do seu travesseiro.</strong><br><br>Enquanto coloca, diga: 'Esta noite, minha energia é minha. O que não é meu, não entra.'",por:"O aroma ativa o sistema límbico durante o sono, criando uma barreira psíquica inconsciente e melhorando a qualidade do sono profundo."},
+  {dia:5,fase:1,nome:"O Toque da Tireoide",subtitulo:"Desbloqueio do chakra da garganta",dur:"2 minutos · Quando precisar",instruccion:"Coloque os dedos indicador e médio suavemente na base do pescoço (onde sente o gogó).<br><br>Massageie em círculos lentos enquanto sussurra, várias vezes: <strong>'Tenho o direito de pedir. Tenho o direito de receber.'</strong>",por:"Libera tensão miofascial acumulada por engolir emoções não expressas. Ativa o chakra Vishuddha — o centro da voz e dos limites."},
+  {dia:6,fase:1,nome:"Jejum de Disponibilidade",subtitulo:"Quebrar o padrão de salvadora de plantão",dur:"1 hora · A escolher",instruccion:"Escolha uma hora do dia. Coloque o celular no modo avião. <strong>Feche a porta do seu quarto.</strong><br><br>Se alguém ligar ou bater, diga: 'Agora não posso.'<br><br>Use esse tempo para fazer o que quiser — ou não fazer nada.",por:"Interrompe o circuito de condicionamento que te ensinou que seu valor depende de estar disponível para todos."},
+  {dia:7,fase:1,nome:"Escrita de Purga",subtitulo:"Fechamento de ciclo da primeira semana",dur:"5 minutos · Qualquer momento",instruccion:"Pegue um papel. Escreva 3 coisas que você fez esta semana <strong>por obrigação, não por amor.</strong><br><br>Leia em voz alta. Depois rasgue o papel em pedaços e jogue no vaso sanitário. <strong>Dê a descarga.</strong>",por:"A catarse física de destruir o papel materializa o fechamento de um ciclo. É o ritual de finalização da Fase 1."},
+  {dia:8,fase:2,nome:"Frequência 528Hz para o DNA",subtitulo:"Reparação celular e transformação",dur:"12 minutos · Manhã ou noite",instruccion:"Deite-se confortavelmente. Com fones de ouvido, coloque a faixa de 528Hz. <strong>Visualize uma luz verde esmeralda</strong> entrando pela coroa da cabeça e preenchendo seu corpo célula por célula.",por:"528Hz é a frequência da reparação. É chamada de 'frequência do amor' — ressonando diretamente com o DNA segundo pesquisas de bioacústica."},
+  {dia:9,fase:2,nome:"Postura de Poder Ancestral",subtitulo:"Ativação da energia Yin-Yang",dur:"2 minutos · Ao acordar",instruccion:"De pé, pés separados na largura dos ombros. <strong>Braços na cintura (mãos nos quadris).</strong> Queixo erguido. Respire fundo por 2 minutos.<br><br>Antes de sair ao mundo, diga: 'Hoje eu ocupo meu espaço.'",por:"A postura expansiva ativa a testosterona e reduz o cortisol em 20% em 2 minutos (Harvard Business School, Amy Cuddy)."},
+  {dia:10,fase:2,nome:"Banho de Sal Grosso e Eucalipto",subtitulo:"Limpeza do campo áurico físico",dur:"15 minutos · Noite",instruccion:"Adicione ao banho: <strong>1 xícara de sal grosso + 5 gotas de óleo de eucalipto.</strong><br><br>Enquanto a água corre, imagine que tudo que você recebeu hoje de outras pessoas — seus medos, suas demandas, sua energia — se dissolve na água e vai pelo ralo.",por:"O sal limpa o campo eletromagnético corporal. O eucalipto tem propriedades antissépticas áuricas na tradição xamânica latino-americana."},
+  {dia:11,fase:2,nome:"Visualização do Cordão Cortado",subtitulo:"Liberação de conexões energéticas drenantes",dur:"8 minutos · Noite",instruccion:"Feche os olhos. Visualize um cordão de luz entre você e cada pessoa que te esgotou esta semana.<br><br>Pegue uma tesoura de luz dourada. Com amor — sem raiva — <strong>corte cada cordão.</strong><br><br>Diga: 'Eu te libero. E me libero.'",por:"Técnica de cutting cords da psicologia transpessoal. Interrompe padrões de codependência energética."},
+  {dia:12,fase:2,nome:"Mantra de Devolução",subtitulo:"Recuperação de energia vital",dur:"5 minutos · Quando sentir esgotamento",instruccion:"Sente-se com as costas retas. Feche os olhos. Repita 21 vezes: <strong>'Eu volto para mim. Minha energia é minha. Sou suficiente.'</strong><br><br>A cada repetição, imagine que uma luz dourada volta ao seu peito.",por:"A repetição de 21 vezes ativa a neuroplasticidade — o cérebro começa a criar novos caminhos neurais depois do ciclo 21."},
+  {dia:13,fase:2,nome:"Tapping (EFT) da Culpa",subtitulo:"Liberação da culpa por existir",dur:"7 minutos · Tarde",instruccion:"Com dois dedos, <strong>toque suavemente a lateral da mão (karate chop)</strong> enquanto diz: 'Embora às vezes me sinta culpada por pedir, eu me aceito completamente.'<br><br>Depois toque a sobrancelha, o olho, abaixo do olho, abaixo do nariz, queixo, clavícula, abaixo do braço — repetindo: 'Essa culpa. Essa culpa. Essa culpa.'",por:"EFT (Emotional Freedom Technique) combina acupressão com psicologia cognitiva. Estudos da APA mostram redução de cortisol de 43% em uma única sessão."},
+  {dia:14,fase:2,nome:"Ritual do Fogo Seguro",subtitulo:"Fechamento da Fase 2 — Purificação",dur:"5 minutos · Noite",instruccion:"Acenda uma vela pequena (qualquer cor). Escreva em um papel: <strong>tudo que você quer deixar para trás.</strong> Medos, padrões, pessoas, situações.<br><br>Queime o papel na chama da vela (faça com segurança, sobre um pratinho). Observe a fumaça subir.",por:"O fogo é o elemento da transformação em todas as culturas. O ritual marca o final da fase de purificação."},
+  {dia:15,fase:3,nome:"Frequência 741Hz",subtitulo:"Despertar da intuição e do poder",dur:"10 minutos · Manhã",instruccion:"Antes do café da manhã. Fones de ouvido. Faixa de 741Hz. <strong>Visualize um sol laranja brilhante no seu plexo solar</strong> (abaixo do umbigo) que se expande a cada respiração.",por:"741Hz trabalha o chakra do plexo solar — centro do poder pessoal, a autoexpressão e os limites."},
+  {dia:16,fase:3,nome:"Diário de Evidências de Valor",subtitulo:"Reconexão com o próprio mérito",dur:"5 minutos · Noite",instruccion:"Antes de dormir, escreva em um caderno (só para isso): <strong>3 coisas que você fez bem hoje.</strong> Não 'grandes' coisas. Qualquer coisa.<br><br>Leia em voz alta antes de apagar a luz.",por:"A evidência concreta contrarresta o viés de negatividade do cérebro. Constrói autoestima de dentro para fora."},
+  {dia:17,fase:3,nome:"Ancoragem de Aroma de Baunilha",subtitulo:"Programação do estado de merecimento",dur:"3 minutos · Quando estiver tranquila",instruccion:"Coloque algumas gotas de essência de baunilha nos seus pulsos. Inale fundo 5 vezes. <strong>Enquanto inala, lembre um momento em que se sentiu amada e completa.</strong><br><br>Repita este processo cada vez que usar a baunilha esta semana.",por:"O sistema olfativo tem conexão direta com a amígdala (memória emocional). A ancoragem NLP associa o aroma ao estado emocional desejado."},
+  {dia:18,fase:3,nome:"Caminhada de Enraizamento",subtitulo:"Conexão com a terra e o corpo",dur:"10 minutos · Qualquer momento",instruccion:"Se puder, <strong>saia descalça para um jardim, grama ou terra.</strong> Se não, faça em casa.<br><br>Caminhe lentamente. A cada passo, sinta o chão sob seus pés. Diga mentalmente: 'Estou aqui. Estou segura. Mereço estar aqui.'",por:"Earthing/Grounding — o contato com a terra reduz a inflamação e regula o ritmo circadiano (Journal of Environmental and Public Health, 2012)."},
+  {dia:19,fase:3,nome:"Respiração de Coerência Cardíaca",subtitulo:"Equilíbrio do campo eletromagnético do coração",dur:"5 minutos · Manhã e noite",instruccion:"Inspire contando 5 segundos. Expire contando 5 segundos. Sem pausa.<br><br><strong>Coloque uma mão no coração. Imagine que você respira A PARTIR do coração.</strong><br><br>Repita por 5 minutos.",por:"A coerência cardíaca 5-5 sincroniza o ritmo cardíaco com as ondas cerebrais alfa. O HeartMath Institute documenta melhoras no cortisol e IgA após 3 semanas."},
+  {dia:20,fase:3,nome:"Pedra Ametista",subtitulo:"Amplificador do chakra cardíaco",dur:"O dia todo",instruccion:"Coloque uma pedra de ametista (ou qualquer pedra roxa que você tenha) dentro do sutiã, sobre o coração.<br><br>Toda vez que sentir, lembre sua intenção desta semana: <strong>'Estou abrindo espaço para receber.'</strong>",por:"A ametista vibra em frequências que ressoam com o chakra do terceiro olho e o cardíaco na tradição cristalina."},
+  {dia:21,fase:3,nome:"Canto Gutural de Liberação",subtitulo:"Ativação da voz reprimida",dur:"3 minutos · Quando estiver sozinha",instruccion:"Sozinha em casa ou no carro. Feche os olhos. <strong>Emita o som 'AAAH' ou 'OMMM' do mais fundo da sua garganta</strong> — tão alto quanto puder.<br><br>Sinta as vibrações no seu peito e pescoço. Repita 5 vezes.",por:"As vibrações sonoras estimulam o nervo vago através da faringe. Libera tensão crônica do chakra da garganta."},
+  {dia:22,fase:4,nome:"Frequência 852Hz",subtitulo:"Desfazer ilusões e clareza mental",dur:"12 minutos · Noite",instruccion:"Fones de ouvido. Faixa de 852Hz. <strong>Visualize uma luz azul anil limpíssima entrando pelo seu terceiro olho</strong> (testa). Observe quais pensamentos surgem sem julgá-los.",por:"852Hz trabalha o chakra do terceiro olho — centro da intuição, a clareza e a percepção sem distorção."},
+  {dia:23,fase:4,nome:"O Espelho da Deusa",subtitulo:"Reconexão com a própria beleza energética",dur:"5 minutos · Manhã",instruccion:"Fique de frente ao espelho. Olhe nos seus próprios olhos — diretamente. Sem julgamento.<br><br><strong>Diga em voz alta: 'Eu te vejo. Você é suficiente. Você é amada. Você é poderosa.'</strong><br><br>Se sentir vergonha ou choro — fique ali. É a ferida curando.",por:"O espelho ativa a autoconsciência cortical. A dissonância entre a mensagem verbal positiva e a autocrítica crônica cria uma crise cognitiva que abre a neuroplasticidade."},
+  {dia:24,fase:4,nome:"Mapa Térmico Mental",subtitulo:"Cartografar os padrões inconscientes",dur:"10 minutos · Tarde",instruccion:"Em um papel, desenhe duas colunas. <strong>'O que dou'</strong> e <strong>'O que recebo'</strong>.<br><br>Preencha ambas honestamente. Observe o desequilíbrio sem culpa.<br><br>No final, escreva: 'Isso muda agora.'",por:"A externalização dos padrões no papel ativa o córtex pré-frontal, desativando a resposta emocional reativa do sistema límbico."},
+  {dia:25,fase:4,nome:"Círculo de Sal de Proteção",subtitulo:"Blindagem do campo áurico",dur:"3 minutos · Noite",instruccion:"Antes de dormir, coloque um pequeno círculo de sal no chão ao redor da cama (ou só nos cantos do quarto).<br><br>Diga: <strong>'Este espaço é sagrado. Só entra amor. Só sai amor.'</strong>",por:"O sal absorve umidade e cria um campo eletromagnético fraco — simbólica e energeticamente marca um limite físico."},
+  {dia:26,fase:4,nome:"Afirmação Paradoxal",subtitulo:"Dissolver a resistência inconsciente",dur:"5 minutos · Manhã",instruccion:"Diga em voz alta: <strong>'Está tudo bem que as coisas estejam difíceis hoje. Não preciso ser perfeita. Posso estar cansada E continuar sendo amada.'</strong><br><br>Repita 7 vezes. Sem tentar acreditar — só diga as palavras.",por:"O paradoxo desativa a resistência psicológica. Em vez de lutar contra a realidade, a aceitação cria o espaço para a mudança."},
+  {dia:27,fase:4,nome:"Banho de Rosas Brancas",subtitulo:"Ativação do amor próprio físico",dur:"20 minutos · Noite",instruccion:"Prepare um banho ou bacia com água morna. Adicione pétalas de rosa branca (ou vermelha) + sal rosa do Himalaia.<br><br><strong>Mergulhe ou passe a água pelo corpo lentamente.</strong> Enquanto faz isso, diga: 'Eu mereço isso.'",por:"O ritual de beleza sagrado ativa o sistema parassimpático e cria uma experiência sensorial de amor próprio que o corpo armazena na memória celular."},
+  {dia:28,fase:4,nome:"Carta para o Meu Eu do Futuro",subtitulo:"Ancorar a nova identidade energética",dur:"15 minutos · Tarde",instruccion:"Escreva uma carta para o seu eu de daqui a 1 ano. <strong>Escreva como se já tivesse curado.</strong><br><br>'Querida [seu nome]: Você não sabe o que te espera. A mulher que você é agora já não carrega sozinha...'<br><br>Guarde a carta. Leia no Dia 30.",por:"A escrita prospectiva ativa o córtex pré-frontal e consolida a nova identidade como possível — o primeiro passo para torná-la real."},
+  {dia:29,fase:4,nome:"Selo de Frequência Delta",subtitulo:"Programação profunda do subconsciente",dur:"8 minutos · Imediatamente antes de dormir",instruccion:"Deite-se. Fones de ouvido. Faixa de frequência Delta (0.5-4Hz).<br><br><strong>Não tente dormir — deixe o som te levar.</strong> Enquanto escuta, repita mentalmente sua intenção do mês: sua versão curada.",por:"As ondas Delta são as do sono profundo. Ouvi-las enquanto está consciente abre uma janela direta ao subconsciente — onde vive a mudança real."},
+  {dia:30,fase:4,nome:"Ritual do Renascimento Absoluto",subtitulo:"Fechamento e celebração do ciclo completo",dur:"30 minutos · No seu ritmo",instruccion:"Leia a carta que escreveu no Dia 28.<br><br>Acenda uma vela. Escreva em um papel novo todas as coisas que <strong>deixou para trás nestes 30 dias.</strong><br><br>Queime o papel. Guarde as cinzas ou deixe-as voar.<br><br><strong>Diga em voz alta: 'Bem-vinda a casa. Você chegou.'</strong>",por:"O ritual de fechamento integra neurologicamente o processo. O cérebro precisa de um marcador simbólico de finalização para consolidar a mudança como permanente."}
+];
+
+const BADGES = [
+  {id:'primera',icon:'🌙',nome:'Primeira Noite',req:1},
+  {id:'tres',icon:'🌟',nome:'3 Dias',req:3},
+  {id:'siete',icon:'🔥',nome:'1 Semana',req:7},
+  {id:'quince',icon:'💫',nome:'Metade do Caminho',req:15},
+  {id:'veinte',icon:'🌺',nome:'20 Dias',req:20},
+  {id:'treinta',icon:'👑',nome:'Ciclo Completo',req:30},
+];
+
+const SINAIS = [
+  {titulo:"A Síndrome do Sofá Culpado",desc:"Você senta para descansar às 9 da noite, mas não consegue. Sente uma 'eletricidade' no estômago, como se estivesse esquecendo de fazer algo para alguém. Seu corpo desaprendeu a descansar sem culpa."},
+  {titulo:"O Bruxismo do Silêncio",desc:"Você acorda com a mandíbula travada e tensão na base do pescoço. O médico diz que é estresse. Mas são todas as vezes que você engoliu o que queria dizer para não estragar o clima."},
+  {titulo:"O Cofre Invisível",desc:"Você antecipa as necessidades de todos — sabe onde está a chave, prepara a comida favorita deles. Mas quando você está esgotada ou doente, ninguém percebe. Você precisa pedir explicitamente um copo d'água."},
+  {titulo:"O Peso Matinal no Peito",desc:"Você dorme 8 horas mas acorda sentindo um bloco de concreto no centro do peito. Sua primeira emoção do dia não é esperança. É um suspiro de resignação."},
+  {titulo:"O Caixa Eletrônico Financeiro",desc:"O dinheiro entra na sua mão e sai imediatamente para pagar contas ou ajudar alguém. Todo mundo saca. Ninguém deposita. Você funciona como um caixa eletrônico emocional e financeiro ao mesmo tempo."}
+];
+
+const TERAPIA_IMGS = {1: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200&h=200&fit=crop&q=60", 2: "https://images.unsplash.com/photo-1508672019048-805c876b67e2?w=200&h=200&fit=crop&q=60", 3: "https://images.unsplash.com/photo-1545558014-8692077e9b5c?w=200&h=200&fit=crop&q=60", 4: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=200&h=200&fit=crop&q=60", 5: "https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?w=200&h=200&fit=crop&q=60", 6: "https://images.unsplash.com/photo-1600618528240-fb9fc964b853?w=200&h=200&fit=crop&q=60", 7: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=200&h=200&fit=crop&q=60", 8: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=200&h=200&fit=crop&q=60", 9: "https://images.unsplash.com/photo-1552196563-55cd4e45efb3?w=200&h=200&fit=crop&q=60", 10: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=200&fit=crop&q=60", 11: "https://images.unsplash.com/photo-1604480132736-44c188fe4d20?w=200&h=200&fit=crop&q=60", 12: "https://images.unsplash.com/photo-1487530811015-780c01a65f1d?w=200&h=200&fit=crop&q=60", 13: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&h=200&fit=crop&q=60", 14: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=200&h=200&fit=crop&q=60", 15: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=200&h=200&fit=crop&q=60", 16: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=200&h=200&fit=crop&q=60", 17: "https://images.unsplash.com/photo-1593811167562-9cef47bfc4d7?w=200&h=200&fit=crop&q=60", 18: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&q=60", 19: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=200&h=200&fit=crop&q=60", 20: "https://images.unsplash.com/photo-1471107340929-a87cd0f5b5f3?w=200&h=200&fit=crop&q=60", 21: "https://images.unsplash.com/photo-1517639493569-5666a7a3b2cc?w=200&h=200&fit=crop&q=60", 22: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=200&h=200&fit=crop&q=60", 23: "https://images.unsplash.com/photo-1562887245-66a43f5b4bab?w=200&h=200&fit=crop&q=60", 24: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=200&h=200&fit=crop&q=60", 25: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=200&h=200&fit=crop&q=60", 26: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=200&h=200&fit=crop&q=60"};
+
+const TERAPIAS_DATA = [
+  {id:1,tipo:'Sonora',icon:'🎵',nome:'Frequência 432Hz',dur:'9 min',instrucao:'Deite-se confortavelmente. Coloque fones de ouvido. Feche os olhos e coloque a mão direita no centro do peito. Deixe a frequência de 432Hz te envolver. Esta frequência ressoa com o coração e reduz o estresse, movendo seu cérebro de ondas Beta para Theta.',porque:'432Hz é conhecida como a frequência do universo. Estudos mostram que ela reduz cortisol e ativa o sistema parassimpático, promovendo relaxamento profundo e cura emocional.',receita:'',video:'',chakra:'Coração'},
+  {id:2,tipo:'Sonora',icon:'🔊',nome:'Frequência 528Hz',dur:'12 min',instrucao:'Visualize uma luz verde esmeralda entrando pela coroa da cabeça. Deixe a frequência 528Hz preencher cada célula do seu corpo. Esta é a frequência do amor e da reparação celular.',porque:'528Hz é chamada de "frequência do amor". Pesquisas em bioacústica mostram que ela promove reparação do DNA e transformação celular, além de abrir o coração para receber amor.',receita:'',video:'',chakra:'Coração e Plexo Solar'},
+  {id:3,tipo:'Sonora',icon:'🌊',nome:'Frequência 741Hz',dur:'10 min',instrucao:'Antes de começar, visualize um sol laranja brilhante no seu plexo solar (abaixo do umbigo). A frequência 741Hz trabalha diretamente no seu poder pessoal e autoexpressão.',porque:'741Hz trabalha o chakra do plexo solar, centro do poder pessoal. Esta frequência ajuda a liberar bloqueios emocionais e ativa a capacidade de expressar limites e necessidades.',receita:'',video:'',chakra:'Plexo Solar'},
+  {id:4,tipo:'Sonora',icon:'💠',nome:'Frequência 852Hz',dur:'12 min',instrucao:'Visualize uma luz azul anil limpíssima entrando pelo seu terceiro olho (testa). Deixe a frequência 852Hz limpar ilusões e trazer clareza mental. Observe pensamentos sem julgá-los.',porque:'852Hz trabalha o chakra do terceiro olho, centro da intuição. Esta frequência dissolve padrões mentais limitantes e abre a percepção para verdades mais profundas.',receita:'',video:'',chakra:'Terceiro Olho'},
+  {id:5,tipo:'Sonora',icon:'🌙',nome:'Frequência Delta',dur:'8 min',instrucao:'Imediatamente antes de dormir. Deite-se na cama. Coloque fones de ouvido. Não tente dormir — deixe o som te levar. As ondas Delta abrem uma janela direta ao subconsciente.',porque:'As ondas Delta (0.5-4Hz) são as do sono profundo. Ouvi-las enquanto consciente permite programação profunda do subconsciente, onde vive a mudança real.',receita:'',video:'',chakra:'Raiz e Coroa'},
+  {id:6,tipo:'Somática',icon:'🤲',nome:'Tapping EFT',dur:'7 min',instrucao:'Com dois dedos, toque suavemente a lateral da mão (karate chop) enquanto diz: "Embora às vezes me sinta culpada por pedir, eu me aceito completamente." Depois toque: sobrancelha, olho, abaixo do olho, abaixo do nariz, queixo, clavícula, abaixo do braço — repetindo sua afirmação em cada ponto.',porque:'EFT (Emotional Freedom Technique) combina acupressão com psicologia cognitiva. Estudos da APA mostram redução de cortisol de 43% em uma única sessão. Libera emoções presas nos meridianos energéticos.',receita:'',video:'https://www.youtube.com/embed/example-eft',chakra:'Todos'},
+  {id:7,tipo:'Somática',icon:'💨',nome:'Coerência Cardíaca',dur:'5 min',instrucao:'Inspire contando 5 segundos. Expire contando 5 segundos. Sem pausa. Coloque uma mão no coração. Imagine que você respira A PARTIR do coração. Repita por 5 minutos. Sinta seu coração batendo de forma mais harmoniosa.',porque:'A coerência cardíaca 5-5 sincroniza o ritmo cardíaco com as ondas cerebrais alfa. O HeartMath Institute documenta melhoras no cortisol e IgA após 3 semanas. Equilibra o campo eletromagnético do coração.',receita:'',video:'',chakra:'Coração'},
+  {id:8,tipo:'Somática',icon:'🦶',nome:'Caminhada Grounding',dur:'10 min',instrucao:'Se puder, saia descalça para um jardim, grama ou terra. Se não, faça em casa descalça. Caminhe lentamente. A cada passo, sinta o chão sob seus pés. Diga mentalmente: "Estou aqui. Estou segura. Mereço estar aqui."',porque:'Earthing/Grounding — o contato com a terra reduz inflamação e regula o ritmo circadiano (Journal of Environmental and Public Health, 2012). A terra tem carga elétrica negativa que neutraliza radicais livres no corpo.',receita:'',video:'',chakra:'Raiz'},
+  {id:9,tipo:'Somática',icon:'💪',nome:'Postura de Poder',dur:'2 min',instrucao:'De pé, pés separados na largura dos ombros. Braços na cintura (mãos nos quadris). Queixo erguido. Respire fundo por 2 minutos. Antes de sair ao mundo, diga: "Hoje eu ocupo meu espaço."',porque:'A postura expansiva ativa a testosterona e reduz o cortisol em 20% em 2 minutos (Harvard Business School, Amy Cuddy). O corpo muda a mente — posturas de poder reprogramam padrões de submissão.',receita:'',video:'',chakra:'Plexo Solar'},
+  {id:10,tipo:'Somática',icon:'🗣️',nome:'Canto Gutural',dur:'3 min',instrucao:'Sozinha em casa ou no carro. Feche os olhos. Emita o som "AAAH" ou "OMMM" do mais fundo da sua garganta — tão alto quanto puder. Sinta as vibrações no seu peito e pescoço. Repita 5 vezes.',porque:'As vibrações sonoras estimulam o nervo vago através da faringe. Libera tensão crônica do chakra da garganta. O som gutural ativa a glândula tireoide e libera emoções engolidas.',receita:'',video:'',chakra:'Garganta'},
+  {id:11,tipo:'Ritual',icon:'🕯️',nome:'Ritual de Fogo',dur:'5 min',instrucao:'Acenda uma vela pequena (qualquer cor). Escreva em um papel: tudo que você quer deixar para trás — medos, padrões, pessoas, situações. Queime o papel na chama da vela (faça com segurança, sobre um pratinho). Observe a fumaça subir. Diga: "Eu te libero. E me libero."',porque:'O fogo é o elemento da transformação em todas as culturas. O ritual marca o final de um ciclo. A destruição física do papel cria um marcador neurológico de finalização que o cérebro processa como real.',receita:'',video:'',chakra:'Plexo Solar'},
+  {id:12,tipo:'Ritual',icon:'🌹',nome:'Banho de Rosas',dur:'20 min',instrucao:'Prepare um banho ou bacia com água morna. Adicione pétalas de rosa branca (ou vermelha) + sal rosa do Himalaia. Mergulhe ou passe a água pelo corpo lentamente. Enquanto faz isso, diga: "Eu mereço isso." Feche os olhos e sinta o amor próprio físico.',porque:'O ritual de beleza sagrado ativa o sistema parassimpático e cria uma experiência sensorial de amor próprio que o corpo armazena na memória celular. As rosas têm propriedades calmantes e o sal rosa equilibra minerais.',receita:'<strong>Receita:</strong> 1 xícara de pétalas de rosa + 2 colheres de sal rosa do Himalaia + 5 gotas de óleo essencial de rosa (opcional).',video:'',chakra:'Coração'},
+  {id:13,tipo:'Ritual',icon:'🧂',nome:'Círculo de Sal',dur:'3 min',instrucao:'Antes de dormir, coloque um pequeno círculo de sal no chão ao redor da cama (ou só nos cantos do quarto). Diga: "Este espaço é sagrado. Só entra amor. Só sai amor." O sal absorve energia densa e cria um campo de proteção.',porque:'O sal absorve umidade e cria um campo eletromagnético fraco — simbólica e energeticamente marca um limite físico. Na tradição xamânica, o sal limpa e protege espaços de energia densa.',receita:'<strong>Receita:</strong> Use sal grosso comum. Coloque em pequenos montinhos nos 4 cantos do quarto ou ao redor da cama.',video:'',chakra:'Raiz'},
+  {id:14,tipo:'Ritual',icon:'💧',nome:'O Copo da Intenção',dur:'1 min',instrucao:'Coloque um copo de água na sua mesa de cabeceira. Ponha as duas mãos ao redor do copo. Feche os olhos e diga baixinho ou mentalmente: "Toda a energia que entreguei hoje — volta para mim agora. Esta noite, eu sou a primeira." Pela manhã, beba a água completa antes de falar com alguém.',porque:'Psicomagia e ancoragem neural: o ritual cria uma intenção concreta que o subconsciente processa durante o sono REM. A água carrega intenção e a beber pela manhã ancoriza a programação.',receita:'',video:'',chakra:'Todos'},
+  {id:15,tipo:'Ritual',icon:'🌿',nome:'Barreira de Alecrim',dur:'2 min',instrucao:'Pegue um raminho de alecrim seco ou fresco. Coloque embaixo do seu travesseiro. Enquanto coloca, diga: "Esta noite, minha energia é minha. O que não é meu, não entra." O aroma ativa proteção durante o sono.',porque:'O aroma ativa o sistema límbico durante o sono, criando uma barreira psíquica inconsciente e melhorando a qualidade do sono profundo. O alecrim tem propriedades de limpeza energética.',receita:'<strong>Receita:</strong> Use alecrim fresco ou seco. Se não tiver, use 2-3 gotas de óleo essencial de alecrim em um algodão.',video:'',chakra:'Terceiro Olho'},
+  {id:16,tipo:'Meditação',icon:'✨',nome:'Visualização do Cordão',dur:'8 min',instrucao:'Feche os olhos. Visualize um cordão de luz entre você e cada pessoa que te esgotou esta semana. Pegue uma tesoura de luz dourada. Com amor — sem raiva — corte cada cordão. Diga: "Eu te libero. E me libero." Sinta a energia voltando para você.',porque:'Técnica de cutting cords da psicologia transpessoal. Interrompe padrões de codependência energética. A visualização cria novos caminhos neurais que substituem padrões antigos de conexão drenante.',receita:'',video:'',chakra:'Coração e Plexo Solar'},
+  {id:17,tipo:'Meditação',icon:'🌞',nome:'Toque da Tireoide',dur:'2 min',instrucao:'Coloque os dedos indicador e médio suavemente na base do pescoço (onde sente o gogó). Massageie em círculos lentos enquanto sussurra, várias vezes: "Tenho o direito de pedir. Tenho o direito de receber." Sinta a tensão liberando.',porque:'Libera tensão miofascial acumulada por engolir emoções não expressas. Ativa o chakra Vishuddha — o centro da voz e dos limites. A tireoide armazena emoções não verbalizadas.',receita:'',video:'',chakra:'Garganta'},
+  {id:18,tipo:'Meditação',icon:'🪞',nome:'O Espelho da Deusa',dur:'5 min',instrucao:'Fique de frente ao espelho. Olhe nos seus próprios olhos — diretamente. Sem julgamento. Diga em voz alta: "Eu te vejo. Você é suficiente. Você é amada. Você é poderosa." Se sentir vergonha ou choro — fique ali. É a ferida curando.',porque:'O espelho ativa a autoconsciência cortical. A dissonância entre a mensagem verbal positiva e a autocrítica crônica cria uma crise cognitiva que abre a neuroplasticidade para novas crenças.',receita:'',video:'',chakra:'Terceiro Olho e Coração'},
+  {id:19,tipo:'Meditação',icon:'📖',nome:'Diário de Evidências',dur:'5 min',instrucao:'Antes de dormir, escreva em um caderno (só para isso): 3 coisas que você fez bem hoje. Não "grandes" coisas. Qualquer coisa. Leia em voz alta antes de apagar a luz. A evidência concreta contrarresta o viés de negatividade.',porque:'A evidência concreta contrarresta o viés de negatividade do cérebro. Constrói autoestima de dentro para fora. A leitura em voz alta ancoriza as evidências na memória de longo prazo.',receita:'',video:'',chakra:'Coração'},
+  {id:20,tipo:'Meditação',icon:'✍️',nome:'Escrita de Purga',dur:'5 min',instrucao:'Pegue um papel. Escreva 3 coisas que você fez esta semana por obrigação, não por amor. Leia em voz alta. Depois rasgue o papel em pedaços e jogue no vaso sanitário. Dê a descarga. A catarse física materializa o fechamento.',porque:'A catarse física de destruir o papel materializa o fechamento de um ciclo. É o ritual de finalização. O ato físico de destruir cria um marcador simbólico que o cérebro processa como real.',receita:'',video:'',chakra:'Plexo Solar'},
+  {id:21,tipo:'Cristais',icon:'💎',nome:'Ametista Cardíaca',dur:'Todo el día',instrucao:'Coloque uma pedra de ametista (ou qualquer pedra roxa que você tenha) dentro do sutiã, sobre o coração. Toda vez que sentir, lembre sua intenção desta semana: "Estou abrindo espaço para receber." A ametista vibra em frequências que ressoam com o chakra cardíaco.',porque:'A ametista vibra em frequências que ressoam com o chakra do terceiro olho e o cardíaco na tradição cristalina. Promove abertura do coração e proteção psíquica. A cor roxa ativa a intuição e a compaixão.',receita:'<strong>Como usar:</strong> Carregue no bolso, coloque sobre o coração, ou segure durante meditações. Limpe com água corrente ou sal grosso uma vez por semana.',video:'',chakra:'Coração e Terceiro Olho'},
+  {id:22,tipo:'Cristais',icon:'🌸',nome:'Quartzo Rosa',dur:'Todo el día',instrucao:'Carregue um quartzo rosa no bolso ou coloque sobre o coração durante práticas. Este cristal trabalha especificamente no amor próprio e na cura de feridas de vínculo. Sinta sua energia suave e acolhedora.',porque:'O quartzo rosa é o cristal do amor incondicional. Trabalha diretamente na cura de feridas de relacionamento e promove autocompaixão. Sua vibração suave acalma o sistema nervoso.',receita:'<strong>Como usar:</strong> Coloque sobre o coração durante meditações ou carregue no bolso. Programe com a intenção: "Eu me amo completamente."',video:'',chakra:'Coração'},
+  {id:23,tipo:'Cristais',icon:'🖤',nome:'Turmalina Negra',dur:'Todo el día',instrucao:'Carregue uma turmalina negra no bolso ou coloque ao lado da cama. Este cristal é um poderoso protetor energético que absorve energia densa e bloqueia drenagem energética.',porque:'A turmalina negra é um dos mais poderosos protetores energéticos. Absorve energia negativa e bloqueia drenagem de outros. Essencial para quem tem padrão de codependência energética.',receita:'<strong>Como usar:</strong> Carregue no bolso direito ou coloque nos cantos do quarto. Limpe com água corrente e sal grosso diariamente.',video:'',chakra:'Raiz'},
+  {id:24,tipo:'Ervas',icon:'🌿',nome:'Infusão de Lavanda',dur:'10 min',instrucao:'Prepare uma infusão com 1 colher de chá de flores de lavanda secas em 1 xícara de água quente. Deixe em infusão por 5-7 minutos. Beba antes de dormir ou quando sentir ansiedade. A lavanda acalma o sistema nervoso e promove sono profundo.',porque:'A lavanda contém linalol, que tem propriedades ansiolíticas comprovadas. Reduz cortisol e promove relaxamento. O ritual de preparar e beber cria um momento de autocuidado sagrado.',receita:'<strong>Receita:</strong> 1 colher de chá de flores de lavanda secas + 1 xícara de água quente (não fervente). Deixe em infusão 5-7 min. Adicione mel se desejar.',video:'',chakra:'Coração e Terceiro Olho'},
+  {id:25,tipo:'Ervas',icon:'🍋',nome:'Limonada com Gengibre',dur:'5 min',instrucao:'Prepare uma limonada com suco de 1 limão, 1 colher de chá de gengibre ralado, água morna e mel. Beba pela manhã para ativar o sistema digestivo e energizar o corpo. O gengibre aquece e o limão limpa.',porque:'O gengibre aquece o corpo e ativa a circulação. O limão alcaliniza e limpa. Esta combinação energiza o sistema digestivo e promove clareza mental. O ritual matinal cria intenção positiva para o dia.',receita:'<strong>Receita:</strong> Suco de 1 limão + 1 colher de chá de gengibre ralado + 1 xícara de água morna + 1 colher de mel. Misture e beba em jejum.',video:'',chakra:'Plexo Solar'},
+  {id:26,tipo:'Ervas',icon:'🌱',nome:'Chá de Camomila',dur:'10 min',instrucao:'Prepare uma infusão com 1 colher de chá de flores de camomila em 1 xícara de água quente. Deixe em infusão por 5 minutos. Beba quando sentir esgotamento ou antes de dormir. A camomila é um dos mais suaves calmantes naturais.',porque:'A camomila contém apigenina, que se liga aos receptores de benzodiazepina no cérebro, promovendo relaxamento natural. Reduz ansiedade e melhora a qualidade do sono sem efeitos colaterais.',receita:'<strong>Receita:</strong> 1 colher de chá de flores de camomila secas + 1 xícara de água quente. Infusão 5 min. Adicione mel e limão se desejar.',video:'',chakra:'Coração'},
+];
+
+const AUDIO_SECTIONS = [
+  {time:'0:00',titulo:'Abertura — Conexão e Alívio',sub:'Sei que você está cansada. Sua dor não é fraqueza.'},
+  {time:'5:00',titulo:'Carta 1 — A Raiz do Bloqueio',sub:'O que sua primeira carta revela sobre a origem'},
+  {time:'12:00',titulo:'Carta 2 — O Diagnóstico',sub:'Por que você dá tudo e recebe pouco'},
+  {time:'20:00',titulo:'Carta 3 — O Caminho',sub:'A neuroplasticidade e a cura possível'},
+  {time:'27:00',titulo:'Encerramento — Bem-vinda a Casa',sub:'O primeiro passo começa esta noite'},
+];
+
+const MOTIVACIONAIS = [
+  "Hoje você não precisa resolver nada. Só precisa <strong>sentir.</strong>",
+  "O esgotamento que você sente não é fraqueza. É o sinal de que <strong>já é suficiente.</strong>",
+  "Você dá tanto em silêncio. Hoje, esse silêncio se transforma em <strong>poder.</strong>",
+  "Cada prática que você completa diz ao seu campo energético: <strong>eu me escolho primeiro.</strong>",
+  "Você não precisa ser perfeita para merecer descanso. <strong>Você merece pelo simples fato de existir.</strong>",
+  "A ferida não define quem você é. Define <strong>quanto espaço você tem para curar.</strong>",
+  "Hoje, só uma coisa: <strong>coloque a mão no peito. Sinta seu coração bater. Isso é suficiente.</strong>",
+];
+
+const WEEKLY_CHALLENGES = [
+  {semana:1,desafio:"7 dias sem se desculpar por existir",recompensa:"Badge 'Eu Existo'",tracker:"diasSemDesculpas",pontos:50},
+  {semana:2,desafio:"Dizer 'não' 3 vezes esta semana",recompensa:"Badge 'Limites Dourados'",tracker:"vezesDitoNao",pontos:30},
+  {semana:3,desafio:"Fazer algo só por você 5 vezes",recompensa:"Badge 'Autocuidado'",tracker:"vezesAutocuidado",pontos:40},
+  {semana:4,desafio:"Completar todas as práticas da semana",recompensa:"Badge 'Dedicação'",tracker:"praticasCompletas",pontos:60}
+];
+
+function getMoonPhase(){
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const day = now.getDate();
+  
+  // Algoritmo simplificado para fase lunar
+  const lunarCycle = 29.53;
+  const knownNewMoon = new Date(2024, 0, 11); // Data conhecida de lua nova
+  const daysSinceNewMoon = (now - knownNewMoon) / (1000 * 60 * 60 * 24);
+  const daysIntoCycle = daysSinceNewMoon % lunarCycle;
+  
+  if(daysIntoCycle < 1) return {phase:'nova',emoji:'🌑',nome:'Lua Nova',energia:'Renovação'};
+  if(daysIntoCycle < 7.4) return {phase:'crescente',emoji:'🌒',nome:'Lua Crescente',energia:'Crescimento'};
+  if(daysIntoCycle < 14.8) return {phase:'cheia',emoji:'🌕',nome:'Lua Cheia',energia:'Poder'};
+  if(daysIntoCycle < 22.1) return {phase:'minguante',emoji:'🌘',nome:'Lua Minguante',energia:'Liberação'};
+  return {phase:'nova',emoji:'🌑',nome:'Lua Nova',energia:'Renovação'};
+}
+
+// ═══════════════════════════════
+// STATE
+// ═══════════════════════════════
+let state = {
+  name:'',cards:[],completedDays:[],favTerapias:[],doneTerapias:[],
+  checkedSinais:[],streak:0,lastCompleted:null,currentFilter:'Todos',
+  energyLevel:100,energyHistory:[],points:0,level:1,
+  diaryEntries:[],weeklyChallenges:[],evidenceChest:[],bodyMapProgress:{}
+};
+
+function loadState(){
+  const s = localStorage.getItem('mapa_sagrado_v2');
+  if(s) state = JSON.parse(s);
+}
+function saveState(){localStorage.setItem('mapa_sagrado_v2',JSON.stringify(state))}
+
+// ═══════════════════════════════
+// ONBOARDING
+// ═══════════════════════════════
+document.getElementById('ob-name').addEventListener('input',function(){
+  document.getElementById('btn-ob1').disabled = this.value.trim().length < 2;
+});
+
+let selectedCards = [];
+function selectCard(el,emoji,name){
+  if(el.classList.contains('selected')){
+    el.classList.remove('selected');
+    selectedCards = selectedCards.filter(c=>c.name!==name);
+  } else {
+    if(selectedCards.length>=3) return;
+    el.classList.add('selected');
+    selectedCards.push({emoji,name});
+  }
+  document.getElementById('btn-ob2').disabled = selectedCards.length!==3;
+}
+
+function goOb(step){
+  if(step===2){
+    state.name = document.getElementById('ob-name').value.trim();
+  }
+  if(step===3){
+    state.cards = selectedCards;
+    startLoading();
+  }
+  document.querySelectorAll('.ob-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('ob'+step).classList.add('active');
+}
+
+function startLoading(){
+  const statuses = ['ANALISANDO CARTAS...','CALCULANDO FREQUÊNCIA...','ALINHANDO BIOENERGIA...','CONSTRUINDO SEU MAPA...','PRONTO ✦'];
+  let p=0, si=0;
+  const bar = document.getElementById('ob-bar');
+  const status = document.getElementById('ob-status');
+  const iv = setInterval(()=>{
+    p+=2; bar.style.width=p+'%';
+    if(p%20===0 && si<statuses.length-1){si++;status.textContent=statuses[si];}
+    if(p>=100){clearInterval(iv);setTimeout(launchApp,600);}
+  },30);
+}
+
+function launchApp(){
+  saveState();
+  document.getElementById('onboarding').style.display='none';
+  document.getElementById('main-app').style.display='flex';
+  initApp();
+}
+
+// ═══════════════════════════════
+// APP INIT
+// ═══════════════════════════════
+function initApp(){
+  renderHero();
+  renderBadges();
+  renderCartas();
+  renderRadar();
+  renderSinais();
+  renderPlan();
+  renderAudio();
+  renderTerapias();
+  renderEnergyBar();
+  renderDiario();
+  renderArvore();
+  animateRadar();
+  updateStreak();
+  updateLevel();
+}
+
+function renderEnergyBar(){
+  // Função mantida para compatibilidade, mas elementos foram removidos do topbar
+  // A energia ainda é rastreada no state para uso futuro
+  const energy = state.energyLevel || 100;
+  const points = state.points || 0;
+  const level = state.level || 1;
+  
+  // Elementos podem não existir mais, então verificamos antes de usar
+  const energyBar = document.getElementById('energy-bar-fill');
+  const energyText = document.getElementById('energy-text');
+  const pointsDisplay = document.getElementById('points-display');
+  const levelBadge = document.getElementById('level-badge');
+  
+  if(energyBar && energyText) {
+    energyBar.style.width = energy + '%';
+    energyText.textContent = energy + '%';
+  }
+  
+  if(pointsDisplay) {
+    pointsDisplay.textContent = points + ' pts';
+  }
+  
+  if(levelBadge) {
+    const levelData = [
+      {name:'Semente',icon:'🌱'},
+      {name:'Broto',icon:'🌿'},
+      {name:'Árvore',icon:'🌳'},
+      {name:'Floresta',icon:'🌲'},
+      {name:'Sagrada',icon:'✨'}
+    ];
+    const levelInfo = levelData[Math.min(level - 1, levelData.length - 1)];
+    levelBadge.innerHTML = levelInfo.icon + ' ' + levelInfo.name;
+  }
+}
+
+function renderDiario(){
+  const today = new Date().toLocaleDateString('pt-BR', {day:'numeric', month:'long', year:'numeric'});
+  if(document.getElementById('diario-date')) {
+    document.getElementById('diario-date').textContent = today.toUpperCase();
+  }
+  
+  // Emoções
+  const emotions = ['😊','😌','😢','😰','😡','😴','😍','🤔','🙏','✨'];
+  if(document.getElementById('emotion-picker')) {
+    document.getElementById('emotion-picker').innerHTML = emotions.map((e,i)=>`
+      <button class="emotion-btn" onclick="selectEmotion(${i},'${e}')" id="emotion-${i}">${e}</button>
+    `).join('');
+  }
+  
+  // Pergunta do dia baseada na fase
+  const currentDay = getCurrentDay();
+  const currentPhase = currentDay <= 7 ? 1 : currentDay <= 14 ? 2 : currentDay <= 21 ? 3 : 4;
+  const questions = {
+    1: "O que você sentiu ao dizer 'não' hoje?",
+    2: "Qual energia você devolveu hoje?",
+    3: "O que você mereceu hoje?",
+    4: "Como você se sente diferente de quando começou?"
+  };
+  
+  if(document.getElementById('diario-question')) {
+    document.getElementById('diario-question').textContent = questions[currentPhase] || "Como você se sente hoje?";
+  }
+  
+  // Entradas anteriores
+  if(document.getElementById('diario-entries')) {
+    const entries = state.diaryEntries || [];
+    if(entries.length === 0) {
+      document.getElementById('diario-entries').innerHTML = '<p style="text-align:center;color:var(--dim);padding:40px 20px">Ainda não há entradas. Comece escrevendo hoje!</p>';
+    } else {
+      document.getElementById('diario-entries').innerHTML = entries.slice().reverse().map(entry=>`
+        <div class="diario-entry-item">
+          <div class="diario-entry-date">${entry.date}</div>
+          <div class="diario-entry-emotion">${entry.emotion || '✨'}</div>
+          <div class="diario-entry-text">${entry.text}</div>
+        </div>
+      `).join('');
+    }
+  }
+}
+
+let selectedEmotionIndex = null;
+function selectEmotion(i,emoji){
+  document.querySelectorAll('.emotion-btn').forEach(btn=>btn.classList.remove('selected'));
+  document.getElementById('emotion-'+i).classList.add('selected');
+  selectedEmotionIndex = i;
+}
+
+function saveDiaryEntry(){
+  const text = document.getElementById('diario-text').value.trim();
+  if(!text) {
+    showToast('Escreva algo antes de salvar', false);
+    return;
+  }
+  
+  const entry = {
+    date: new Date().toLocaleDateString('pt-BR'),
+    emotion: selectedEmotionIndex !== null ? document.getElementById('emotion-'+selectedEmotionIndex).textContent : '✨',
+    text: text,
+    timestamp: Date.now()
+  };
+  
+  if(!state.diaryEntries) state.diaryEntries = [];
+  state.diaryEntries.push(entry);
+  state.energyLevel = Math.min(100, state.energyLevel + 2);
+  state.points += 5;
+  saveState();
+  renderDiario();
+  renderEnergyBar();
+  document.getElementById('diario-text').value = '';
+  document.querySelectorAll('.emotion-btn').forEach(btn=>btn.classList.remove('selected'));
+  selectedEmotionIndex = null;
+  showToast('✦ Entrada salva no seu diário sagrado', true);
+}
+
+function renderArvore(){
+  const completed = state.completedDays.length;
+  const phases = Math.floor(completed / 7.5);
+  const svg = document.getElementById('arvore-svg');
+  if(!svg) return;
+  
+  // Limpar galhos e folhas anteriores
+  const existing = svg.querySelectorAll('.galho, .folha, .fruto');
+  existing.forEach(el=>el.remove());
+  
+  // Altura do tronco baseada no progresso
+  const troncoHeight = 40 + (phases * 20);
+  const tronco = document.getElementById('tronco');
+  if(tronco) {
+    tronco.setAttribute('y', 280 - troncoHeight);
+    tronco.setAttribute('height', troncoHeight);
+    tronco.setAttribute('fill', `rgba(201,168,76,${0.3 + phases * 0.1})`);
+  }
+  
+  // Adicionar galhos e folhas
+  for(let i = 0; i < phases; i++) {
+    const y = 250 - (i * 30);
+    // Galho esquerdo
+    svg.innerHTML += `<path class="galho" d="M100 ${y} Q80 ${y-10} 70 ${y-20}" stroke="rgba(201,168,76,0.5)" stroke-width="2" fill="none"/>`;
+    // Galho direito
+    svg.innerHTML += `<path class="galho" d="M100 ${y} Q120 ${y-10} 130 ${y-20}" stroke="rgba(201,168,76,0.5)" stroke-width="2" fill="none"/>`;
+    // Folhas
+    svg.innerHTML += `<circle class="folha" cx="70" cy="${y-20}" r="8" fill="rgba(201,168,76,0.3)"/>`;
+    svg.innerHTML += `<circle class="folha" cx="130" cy="${y-20}" r="8" fill="rgba(201,168,76,0.3)"/>`;
+  }
+  
+  // Frutos (badges)
+  const badges = state.completedDays.length >= 7 ? 1 : 0;
+  if(badges > 0) {
+    svg.innerHTML += `<circle class="fruto" cx="100" cy="220" r="6" fill="var(--gold)"/>`;
+  }
+  
+  // Estatísticas
+  if(document.getElementById('arvore-stats')) {
+    document.getElementById('arvore-stats').innerHTML = `
+      <div class="arvore-stat-card">
+        <div class="arvore-stat-value">${completed}</div>
+        <div class="arvore-stat-label">Dias Completos</div>
+      </div>
+      <div class="arvore-stat-card">
+        <div class="arvore-stat-value">${phases}</div>
+        <div class="arvore-stat-label">Fases Concluídas</div>
+      </div>
+      <div class="arvore-stat-card">
+        <div class="arvore-stat-value">${state.doneTerapias.length}</div>
+        <div class="arvore-stat-label">Terapias Realizadas</div>
+      </div>
+      <div class="arvore-stat-card">
+        <div class="arvore-stat-value">${state.energyLevel}</div>
+        <div class="arvore-stat-label">Energia Vital</div>
+      </div>
+    `;
+  }
+}
+
+function getCurrentDay(){
+  return Math.min(state.completedDays.length + 1, 30);
+}
+
+function renderHero(){
+  const day = getCurrentDay();
+  const today = DAYS[day-1];
+  document.getElementById('hero-name').innerHTML = state.name + ' <em>✦</em>';
+  document.getElementById('ring-day').textContent = day;
+  document.getElementById('ring-title').textContent = today ? today.nome : 'Ciclo Completo!';
+  document.getElementById('today-title').textContent = today ? today.nome : 'Ciclo Completo!';
+  document.getElementById('today-duration').textContent = today ? '⏱ '+today.dur : '';
+  // Ring
+  const pct = (state.completedDays.length/30);
+  const offset = 264 - (264*pct);
+  document.getElementById('ring-fill').style.strokeDashoffset = offset;
+  // Motivacional
+  const mi = day % MOTIVACIONAIS.length;
+  document.getElementById('mot-text').innerHTML = '"'+MOTIVACIONAIS[mi]+'"';
+  
+  // Fase lunar
+  const moon = getMoonPhase();
+  if(document.getElementById('moon-emoji')) document.getElementById('moon-emoji').textContent = moon.emoji;
+  if(document.getElementById('moon-name')) document.getElementById('moon-name').textContent = moon.nome;
+  if(document.getElementById('moon-energy')) document.getElementById('moon-energy').textContent = 'Energia de ' + moon.energia;
+}
+
+function renderBadges(){
+  const completed = state.completedDays.length;
+  const container = document.getElementById('badges-row');
+  container.innerHTML = BADGES.map(b=>{
+    const unlocked = completed >= b.req;
+    return `<div class="badge ${unlocked?'unlocked':'locked'}">
+      <div class="badge-icon">${b.icon}</div>
+      <div class="badge-name">${b.nome}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderCartas(){
+  const roles = ['1ª Carta · Raiz','2ª Carta · Diagnóstico','3ª Carta · Caminho'];
+  const c = document.getElementById('cartas-display');
+  c.innerHTML = (state.cards.length?state.cards:[{emoji:'🌙',name:'A Lua'},{emoji:'🗼',name:'A Torre'},{emoji:'⭐',name:'A Estrela'}]).map((card,i)=>
+    `<div class="carta-display">
+      <span class="carta-emoji">${card.emoji}</span>
+      <div class="carta-name">${card.name}</div>
+      <div class="carta-role">${roles[i]}</div>
+    </div>`
+  ).join('');
+  // Audio cartas
+  const ac = document.getElementById('audio-cartas-display');
+  ac.innerHTML = (state.cards.length?state.cards:[{emoji:'🌙'},{emoji:'🗼'},{emoji:'⭐'}]).map(c=>
+    `<div class="audio-carta">${c.emoji}</div>`
+  ).join('');
+}
+
+function renderRadar(){
+  // bars animate on tab switch
+}
+
+function animateRadar(){
+  document.querySelectorAll('.radar-bar-fill').forEach(bar=>{
+    setTimeout(()=>{ bar.style.width = bar.dataset.w + '%'; }, 300);
+  });
+}
+
+function renderSinais(){
+  const container = document.getElementById('sinais-list');
+  container.innerHTML = SINAIS.map((s,i)=>{
+    const checked = state.checkedSinais.includes(i);
+    return `<div class="sinal-item ${checked?'checked':''}" onclick="toggleSinal(${i},this)">
+      <div class="sinal-check">${checked?'✓':''}</div>
+      <div class="sinal-body">
+        <div class="sinal-title">${s.titulo}</div>
+        <div class="sinal-desc">${s.desc}</div>
+      </div>
+    </div>`;
+  }).join('');
+  updateSinaisProgress();
+}
+
+function updateSinaisProgress(){
+  const total = SINAIS.length;
+  const checked = state.checkedSinais.length;
+  const pct = (checked / total) * 100;
+  
+  if(document.getElementById('sinais-count')) {
+    document.getElementById('sinais-count').textContent = `${checked}/${total}`;
+  }
+  
+  if(document.getElementById('sinais-progress-fill')) {
+    document.getElementById('sinais-progress-fill').style.width = pct + '%';
+  }
+}
+
+function toggleSinal(i,el){
+  const wasChecked = el.classList.contains('checked');
+  el.classList.toggle('checked');
+  const checked = el.classList.contains('checked');
+  
+  // Animação suave do checkbox
+  const checkBox = el.querySelector('.sinal-check');
+  if(checked && !wasChecked) {
+    checkBox.textContent = '✓';
+    checkBox.style.transform = 'scale(0.8)';
+    setTimeout(() => {
+      checkBox.style.transform = 'scale(1.1)';
+    }, 50);
+  } else if(!checked) {
+    checkBox.textContent = '';
+    checkBox.style.transform = 'scale(1)';
+  }
+  
+  // Atualizar state
+  if(checked){ 
+    if(!state.checkedSinais.includes(i)) state.checkedSinais.push(i); 
+  } else { 
+    state.checkedSinais = state.checkedSinais.filter(x=>x!==i); 
+  }
+  
+  saveState();
+  updateSinaisProgress();
+  
+  // Mensagens progressivas
+  const count = state.checkedSinais.length;
+  const messages = {
+    1: '✦ O mapa reconhece sua ferida',
+    2: '✨ Você está vendo os padrões com clareza',
+    3: '💫 A consciência é o primeiro passo da cura',
+    4: '🌟 Você está mapeando sua transformação',
+    5: '👑 Todos os sinais reconhecidos. Você está pronta para curar.'
+  };
+  
+  if(checked && messages[count]) {
+    showToast(messages[count], true);
+    
+    // Efeito especial quando marca todos
+    if(count === 5) {
+      setTimeout(() => {
+        showToast('🎉 Seu mapa está completo e personalizado para você!', true);
+        // Bônus de energia por completar todos
+        state.energyLevel = Math.min(100, (state.energyLevel || 100) + 10);
+        state.points += 25;
+        if(typeof renderEnergyBar === 'function') renderEnergyBar();
+        saveState();
+      }, 1500);
+    }
+  }
+  
+  // Animação de confirmação visual
+  if(checked) {
+    el.style.animation = 'fadeUp 0.3s ease';
+  }
+}
+
+// ── PLAN ──
+function renderPlan(){
+  const phases = [
+    {num:1,nome:'Estagnação da Fuga',dias:'Dias 1–7',foco:'Foco somático · Esforço zero',color:'var(--gold)'},
+    {num:2,nome:'Purificação e Limite',dias:'Dias 8–14',foco:'Foco em pedir e dizer não',color:'var(--red)'},
+    {num:3,nome:'Recalibração Magnética',dias:'Dias 15–21',foco:'Foco em merecimento',color:'var(--blue)'},
+    {num:4,nome:'A Nova Frequência',dias:'Dias 22–30',foco:'Blindagem e renascimento',color:'var(--green)'},
+  ];
+  const container = document.getElementById('phases-container');
+  container.innerHTML = phases.map(ph=>{
+    const phaseDays = DAYS.filter(d=>d.fase===ph.num);
+    const daysCells = phaseDays.map(d=>{
+      const completed = state.completedDays.includes(d.dia);
+      const isToday = d.dia === getCurrentDay();
+      const locked = d.dia > getCurrentDay() && !completed;
+      return `<div class="day-cell ${completed?'completed':''} ${isToday?'today':''} ${locked?'locked':''}"
+        onclick="${locked?'':'openDay('+d.dia+')'}" title="Dia ${d.dia}">
+        ${d.dia}
+      </div>`;
+    }).join('');
+    return `<div class="plan-phase">
+      <div class="phase-header" onclick="togglePhase(this)" style="border-left-color:${ph.color}">
+        <span class="phase-num">FASE ${ph.num}</span>
+        <div><div class="phase-name">${ph.nome}</div><div style="font-size:11px;color:var(--dim)">${ph.foco}</div></div>
+        <span class="phase-days">${ph.dias}</span>
+        <span class="phase-toggle">▾</span>
+      </div>
+      <div class="days-grid" style="display:none">${daysCells}</div>
+    </div>`;
+  }).join('');
+  // Open first phase by default
+  const first = container.querySelector('.phase-header');
+  if(first) togglePhase(first);
+}
+
+function togglePhase(header){
+  header.classList.toggle('open');
+  const grid = header.nextElementSibling;
+  grid.style.display = header.classList.contains('open') ? 'grid' : 'none';
+}
+
+// ── MODAL ──
+let currentModalDay = null;
+function openDay(dayNum){
+  const day = DAYS[dayNum-1]; if(!day) return;
+  currentModalDay = dayNum;
+  const completed = state.completedDays.includes(dayNum);
+  document.getElementById('modal-day-label').textContent = '✦ DIA '+dayNum+' DE 30';
+  document.getElementById('modal-title').textContent = day.nome;
+  document.getElementById('modal-subtitle').textContent = day.subtitulo;
+  document.getElementById('modal-duration').innerHTML = '⏱ '+day.dur;
+  document.getElementById('modal-instruction').innerHTML = day.instruccion;
+  document.getElementById('modal-why').textContent = 'Por que funciona? '+day.por;
+  const btn = document.getElementById('btn-complete');
+  if(completed){ btn.textContent='✓ Concluída'; btn.classList.add('done'); }
+  else { btn.textContent='✦ Marcar como concluída'; btn.classList.remove('done'); }
+  document.getElementById('day-modal').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(){
+  // Pausar qualquer frequência tocando
+  if (playing && currentAudioType.startsWith('freq-')) {
+    if (audioSource) {
+      audioSource.stop();
+      audioSource = null;
+    }
+    playing = false;
+    currentAudioType = 'interpretacao';
+  }
+  document.getElementById('day-modal').classList.add('hidden');
+  document.body.style.overflow='';
+}
+
+function completeDay(){
+  if(!currentModalDay) return;
+  if(state.completedDays.includes(currentModalDay)) return;
+  state.completedDays.push(currentModalDay);
+  
+  // Sistema de energia e pontos
+  state.energyLevel = Math.min(100, state.energyLevel + 5);
+  state.points += 10;
+  updateLevel();
+  updateStreak();
+  saveState();
+  
+  document.getElementById('btn-complete').textContent='✓ Concluída';
+  document.getElementById('btn-complete').classList.add('done');
+  renderHero(); renderBadges(); renderPlan();
+  if(typeof renderEnergyBar === 'function') renderEnergyBar();
+  showToast('✦ Dia '+currentModalDay+' concluído — muito bem', true);
+  // Check badges
+  const completed = state.completedDays.length;
+  BADGES.forEach(b=>{ if(completed===b.req) setTimeout(()=>showToast('🏆 Conquista desbloqueada: '+b.nome,true),1500); });
+  setTimeout(closeModal,1200);
+}
+
+function updateStreak(){
+  // Simple streak: consecutive days from most recent
+  const sorted = [...state.completedDays].sort((a,b)=>a-b);
+  let streak = 0;
+  for(let i=sorted.length-1;i>=0;i--){
+    if(i===sorted.length-1||sorted[i]+1===sorted[i+1]) streak++;
+    else break;
+  }
+  state.streak = streak;
+  if(document.getElementById('streak-display')) {
+    document.getElementById('streak-display').textContent = streak;
+  }
+  
+  // Bônus de energia por streak
+  if(streak >= 7) {
+    state.energyLevel = Math.min(100, state.energyLevel + 10);
+    state.points += 20;
+  }
+}
+
+function updateLevel(){
+  const levelThresholds = [0, 300, 600, 900, 1200];
+  const levelNames = ['Semente', 'Broto', 'Árvore', 'Floresta', 'Sagrada'];
+  const levelIcons = ['🌱', '🌿', '🌳', '🌲', '✨'];
+  
+  for(let i = levelThresholds.length - 1; i >= 0; i--) {
+    if(state.points >= levelThresholds[i]) {
+      state.level = i + 1;
+      break;
+    }
+  }
+}
+
+// ── AUDIO ──
+let audioPlayer = null;
+let audioContext = null;
+let audioSource = null;
+let playing = false;
+let currentAudioType = 'interpretacao';
+let backgroundAudioInterval = null;
+
+// Gerador de frequências usando Web Audio API
+function generateTone(frequency, duration) {
+  return new Promise((resolve) => {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    
+    const sampleRate = audioContext.sampleRate;
+    const numSamples = sampleRate * duration;
+    const buffer = audioContext.createBuffer(1, numSamples, sampleRate);
+    const data = buffer.getChannelData(0);
+    
+    for (let i = 0; i < numSamples; i++) {
+      data[i] = Math.sin(2 * Math.PI * frequency * i / sampleRate) * 0.3;
+    }
+    
+    resolve(buffer);
+  });
+}
+
+// Criar áudio de frequência em tempo real
+function createFrequencyAudio(freq, duration) {
+  return new Promise(async (resolve) => {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    
+    if (audioContext.state === 'suspended') {
+      await audioContext.resume();
+    }
+    
+    const buffer = await generateTone(freq, duration);
+    const source = audioContext.createBufferSource();
+    source.buffer = buffer;
+    
+    // Adicionar envelope suave
+    const gainNode = audioContext.createGain();
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.5);
+    gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + duration - 0.5);
+    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
+    
+    source.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    resolve({ source, gainNode });
+  });
+}
+
+// Criar áudio de fundo suave para interpretação
+async function createBackgroundAudio(duration) {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  
+  if (audioContext.state === 'suspended') {
+    await audioContext.resume();
+  }
+  
+  // Frequência suave de 432Hz com variação
+  const buffer = await generateTone(432, duration);
+  const source = audioContext.createBufferSource();
+  source.buffer = buffer;
+  
+  const gainNode = audioContext.createGain();
+  gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+  gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 2);
+  
+  source.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  audioSource = source;
+  source.start(0);
+  
+  // Simular duração para o player
+  let currentTime = 0;
+  if (backgroundAudioInterval) clearInterval(backgroundAudioInterval);
+  
+  backgroundAudioInterval = setInterval(() => {
+    currentTime++;
+    const pct = (currentTime / duration) * 100;
+    document.getElementById('player-bar').style.width = pct + '%';
+    document.getElementById('time-current').textContent = formatTime(currentTime);
+    document.getElementById('time-total').textContent = formatTime(duration);
+    updateWaveform(currentTime, duration);
+    
+    if (currentTime >= duration) {
+      clearInterval(backgroundAudioInterval);
+      if (playing) {
+        playing = false;
+        document.getElementById('play-btn').textContent = '▶';
+        document.querySelectorAll('.wave-bar').forEach(b => b.style.opacity = '0.4');
+        if (audioSource) {
+          audioSource.stop();
+          audioSource = null;
+        }
+      }
+    }
+  }, 1000);
+}
+
+function renderAudio(){
+  // Criar elemento audio se não existir
+  audioPlayer = document.getElementById('audio-player');
+  if (!audioPlayer) {
+    const playerDiv = document.querySelector('.player');
+    audioPlayer = document.createElement('audio');
+    audioPlayer.id = 'audio-player';
+    audioPlayer.preload = 'metadata';
+    audioPlayer.style.display = 'none';
+    playerDiv.parentNode.insertBefore(audioPlayer, playerDiv);
+  }
+  
+  // Tentar carregar arquivo real primeiro (tenta WAV e MP3)
+  audioPlayer.src = 'audio/interpretacao-cartas.wav';
+  audioPlayer.load();
+  audioPlayer.addEventListener('error', function onError() {
+    // Tentar MP3 como fallback
+    audioPlayer.removeEventListener('error', onError);
+    audioPlayer.src = 'audio/interpretacao-cartas.mp3';
+    audioPlayer.load();
+  }, { once: true });
+  
+  // Event listeners para áudio HTML5
+  audioPlayer.addEventListener('loadedmetadata', () => {
+    const total = Math.floor(audioPlayer.duration || 1800);
+    document.getElementById('time-total').textContent = formatTime(total);
+  });
+  
+  audioPlayer.addEventListener('timeupdate', () => {
+    const current = Math.floor(audioPlayer.currentTime);
+    const total = Math.floor(audioPlayer.duration || 1800);
+    const pct = total > 0 ? (current / total) * 100 : 0;
+    document.getElementById('player-bar').style.width = pct + '%';
+    document.getElementById('time-current').textContent = formatTime(current);
+    updateWaveform(current, total);
+  });
+  
+  audioPlayer.addEventListener('ended', () => {
+    playing = false;
+    document.getElementById('play-btn').textContent = '▶';
+    document.querySelectorAll('.wave-bar').forEach(b => b.style.opacity = '0.4');
+  });
+  
+  audioPlayer.addEventListener('error', (e) => {
+    // Se não houver arquivo, usar frequência de fundo quando play for clicado
+    console.log('Áudio não encontrado, usando frequência de fundo');
+  });
+  
+  // Waveform
+  const wf = document.getElementById('waveform');
+  wf.innerHTML = Array.from({length:40},(_,i)=>{
+    const h = 4+Math.random()*28;
+    return `<div class="wave-bar" style="height:${h}px;animation:waveAnim ${.5+Math.random()*.8}s ease infinite;animation-delay:${i*0.05}s"></div>`;
+  }).join('');
+  
+  // Sections com clique
+  const as = document.getElementById('audio-sections');
+  as.innerHTML = AUDIO_SECTIONS.map(s=>`
+    <div class="audio-section" onclick="seekToSection('${s.time}')">
+      <div class="audio-section-time">${s.time}</div>
+      <div><div class="audio-section-title">${s.titulo}</div><div class="audio-section-sub">${s.sub}</div></div>
+      <div class="audio-section-play">▶</div>
+    </div>`).join('');
+}
+
+function togglePlay(){
+  if (currentAudioType === 'interpretacao') {
+    if (audioPlayer && audioPlayer.src && !audioPlayer.src.includes('blob:') && audioPlayer.readyState >= 2) {
+      // Usar áudio HTML5 se disponível
+      if (playing) {
+        audioPlayer.pause();
+        playing = false;
+        document.getElementById('play-btn').textContent = '▶';
+        document.querySelectorAll('.wave-bar').forEach(b => b.style.opacity = '0.4');
+      } else {
+        audioPlayer.play().then(() => {
+          playing = true;
+          document.getElementById('play-btn').textContent = '⏸';
+          document.querySelectorAll('.wave-bar').forEach(b => b.style.opacity = '0.8');
+        }).catch(e => {
+          console.log('Erro ao reproduzir:', e);
+          // Fallback para áudio sintético
+          createBackgroundAudio(1800);
+          playing = true;
+          document.getElementById('play-btn').textContent = '⏸';
+          document.querySelectorAll('.wave-bar').forEach(b => b.style.opacity = '0.8');
+        });
+      }
+    } else {
+      // Usar áudio sintético
+      if (playing) {
+        if (audioSource) {
+          audioSource.stop();
+          audioSource = null;
+        }
+        if (backgroundAudioInterval) {
+          clearInterval(backgroundAudioInterval);
+          backgroundAudioInterval = null;
+        }
+        playing = false;
+        document.getElementById('play-btn').textContent = '▶';
+        document.querySelectorAll('.wave-bar').forEach(b => b.style.opacity = '0.4');
+      } else {
+        createBackgroundAudio(1800);
+        playing = true;
+        document.getElementById('play-btn').textContent = '⏸';
+        document.querySelectorAll('.wave-bar').forEach(b => b.style.opacity = '0.8');
+      }
+    }
+  }
+}
+
+function seek(seconds){
+  if (currentAudioType === 'interpretacao') {
+    if (audioPlayer && audioPlayer.src && !audioPlayer.src.includes('blob:')) {
+      audioPlayer.currentTime = Math.max(0, Math.min(audioPlayer.duration, audioPlayer.currentTime + seconds));
+    }
+  }
+}
+
+function scrub(e){
+  if (currentAudioType === 'interpretacao') {
+    if (audioPlayer && audioPlayer.src && !audioPlayer.src.includes('blob:')) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      audioPlayer.currentTime = pct * audioPlayer.duration;
+    }
+  }
+}
+
+function seekToSection(timeStr){
+  const [min, sec] = timeStr.split(':').map(Number);
+  const targetTime = min * 60 + sec;
+  
+  if (audioPlayer && audioPlayer.src && !audioPlayer.src.includes('blob:')) {
+    audioPlayer.currentTime = targetTime;
+    if (!playing) togglePlay();
+  }
+}
+
+function formatTime(s){
+  return Math.floor(s/60)+':'+(s%60<10?'0':'')+Math.floor(s%60);
+}
+
+function updateWaveform(current, total){
+  // Atualizar visualização do waveform baseado no progresso
+  const bars = document.querySelectorAll('.wave-bar');
+  const activeIndex = total > 0 ? Math.floor((current / total) * bars.length) : 0;
+  bars.forEach((bar, i) => {
+    if (i <= activeIndex && playing) {
+      bar.style.opacity = '0.8';
+    } else {
+      bar.style.opacity = '0.4';
+    }
+  });
+}
+
+// ── TERAPIAS ──
+let currentFilter='Todos';
+function renderTerapias(){
+  const filters = ['Todos','Sonora','Somática','Ritual','Meditação','Cristais','Ervas'];
+  document.getElementById('filter-row').innerHTML = filters.map(f=>
+    `<button class="filter-btn ${f===currentFilter?'active':''}" onclick="setFilter('${f}')">${f}</button>`
+  ).join('');
+  const filtered = currentFilter==='Todos'?TERAPIAS_DATA:TERAPIAS_DATA.filter(t=>t.tipo===currentFilter);
+  document.getElementById('terapias-grid').innerHTML = filtered.map(t=>{
+    const done = state.doneTerapias.includes(t.id);
+    const fav = state.favTerapias.includes(t.id);
+    const favClass = fav ? 'active' : '';
+    return `<div class="terapia-card ${done?'done':''} ${fav&&!done?'fav':''}" onclick="openTerapia(${t.id})">
+      ${done
+        ? `<span class="terapia-done-badge">✓</span>`
+        : `<span class="terapia-fav ${favClass}" onclick="event.stopPropagation();toggleFav(${t.id})">${fav?'★':'☆'}</span>`
+      }
+      <div class="terapia-emoji-wrap">
+        <div class="terapia-img-dur">${t.dur}</div>
+        <div class="terapia-emoji">${t.icon}</div>
+        <div class="terapia-img-type">${t.tipo}</div>
+      </div>
+      <div class="terapia-body">
+        <div class="terapia-name">${t.nome}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setFilter(f){currentFilter=f;renderTerapias();}
+function toggleFav(id){
+  if(state.favTerapias.includes(id)) state.favTerapias=state.favTerapias.filter(x=>x!==id);
+  else state.favTerapias.push(id);
+  saveState(); renderTerapias();
+}
+function openTerapia(id){
+  const t = TERAPIAS_DATA.find(x=>x.id===id);
+  const done = state.doneTerapias.includes(id);
+  
+  // Se for terapia sonora, preparar para tocar frequência
+  let freq = null;
+  let duration = null;
+  if (t.tipo === 'Sonora') {
+    const freqMap = {
+      1: 432,   // 432Hz
+      2: 528,   // 528Hz
+      3: 741,   // 741Hz
+      4: 852,   // 852Hz
+      5: 2      // Delta (0.5-4Hz) - usar 2Hz como representativo
+    };
+    
+    freq = freqMap[t.id];
+    const durMatch = t.dur.match(/(\d+)/);
+    duration = durMatch ? parseInt(durMatch[1]) * 60 : 540; // Converter minutos para segundos
+  }
+  
+  // Reuse day modal for terapia
+  currentModalDay = null;
+  document.getElementById('modal-day-label').textContent = '✦ '+t.tipo.toUpperCase() + (t.chakra ? ' · ' + t.chakra : '');
+  document.getElementById('modal-title').textContent = t.nome;
+  document.getElementById('modal-subtitle').textContent = '';
+  document.getElementById('modal-duration').innerHTML = '⏱ '+t.dur;
+  
+  // Construir conteúdo completo da terapia
+  let instructionHTML = '';
+  
+  if (t.tipo === 'Sonora' && freq) {
+    instructionHTML = `<strong>Coloque seus fones de ouvido.</strong> A frequência ${freq}Hz começará automaticamente quando você clicar em "Tocar".<br><br>${t.instrucao || ''}`;
+  } else {
+    instructionHTML = t.instrucao || 'Siga as instruções desta terapia conforme seu protocolo do dia. Cada prática que você realiza fortalece seu campo energético.';
+  }
+  
+  // Adicionar receita se houver
+  if (t.receita) {
+    instructionHTML += '<br><br>' + t.receita;
+  }
+  
+  document.getElementById('modal-instruction').innerHTML = instructionHTML;
+  document.getElementById('modal-why').textContent = t.porque || '';
+  
+  const btn=document.getElementById('btn-complete');
+  
+  // Terapias sonoras sempre permitem tocar novamente
+  if (t.tipo === 'Sonora' && freq) {
+    if(done){
+      btn.textContent='▶ Tocar Novamente';
+      btn.classList.remove('done');
+      btn.onclick = () => playFrequencyTherapy(id, freq, duration, t.nome);
+    } else {
+      btn.textContent='▶ Tocar Frequência';
+      btn.classList.remove('done');
+      btn.onclick = () => playFrequencyTherapy(id, freq, duration, t.nome);
+    }
+  } else {
+    // Terapias não-sonoras
+    if(done){
+      btn.textContent='✓ Realizada';
+      btn.classList.add('done');
+      btn.onclick = null;
+    } else {
+      btn.textContent='✦ Marcar como realizada';
+      btn.classList.remove('done');
+      btn.onclick = () => completeTerapia(id);
+    }
+  }
+  document.getElementById('day-modal').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+}
+
+// Tocar frequência da terapia
+async function playFrequencyTherapy(id, freq, duration, nome) {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  
+  // Resolver contexto de áudio se estiver suspenso
+  if (audioContext.state === 'suspended') {
+    await audioContext.resume();
+  }
+  
+  const btn = document.getElementById('btn-complete');
+  
+  const alreadyDone = state.doneTerapias.includes(id);
+  
+  if (playing && currentAudioType === `freq-${id}`) {
+    // Pausar
+    if (audioSource) {
+      audioSource.stop();
+      audioSource = null;
+    }
+    playing = false;
+    currentAudioType = 'interpretacao';
+    btn.textContent = alreadyDone ? '▶ Tocar Novamente' : '▶ Tocar Frequência';
+    showToast('Frequência pausada', false);
+  } else {
+    // Parar qualquer áudio anterior
+    if (audioSource) {
+      audioSource.stop();
+      audioSource = null;
+    }
+    if (audioPlayer && !audioPlayer.paused) {
+      audioPlayer.pause();
+    }
+    if (backgroundAudioInterval) {
+      clearInterval(backgroundAudioInterval);
+      backgroundAudioInterval = null;
+    }
+    
+    // Tocar nova frequência
+    try {
+      const { source, gainNode } = await createFrequencyAudio(freq, duration);
+      audioSource = source;
+      playing = true;
+      currentAudioType = `freq-${id}`;
+      btn.textContent = '⏸ Pausar';
+      btn.classList.remove('done');
+      
+      // Atualizar barra de progresso
+      let currentTime = 0;
+      const progressInterval = setInterval(() => {
+        currentTime++;
+        const pct = (currentTime / duration) * 100;
+        // Não temos elemento de progresso no modal, mas podemos mostrar toast
+        if (currentTime >= duration) {
+          clearInterval(progressInterval);
+        }
+      }, 1000);
+      
+      source.onended = () => {
+        playing = false;
+        audioSource = null;
+        currentAudioType = 'interpretacao';
+        clearInterval(progressInterval);
+        
+        // Se ainda não estava completa, marcar como completa
+        if (!alreadyDone) {
+          completeTerapia(id);
+          btn.textContent = '✓ Concluída - Tocar Novamente';
+          btn.classList.add('done');
+          showToast(`✦ ${nome} concluída`, true);
+        } else {
+          // Se já estava completa, apenas permitir tocar novamente
+          btn.textContent = '▶ Tocar Novamente';
+          btn.classList.remove('done');
+          showToast(`✦ ${nome} finalizada`, true);
+        }
+      };
+      
+      source.start(0);
+      showToast(`Frequência ${freq}Hz iniciada`, true);
+      
+      // Atualizar texto do botão baseado no estado
+      if (alreadyDone) {
+        btn.textContent = '⏸ Pausar';
+      }
+    } catch (e) {
+      console.error('Erro ao criar frequência:', e);
+      showToast('Erro ao reproduzir frequência', false);
+    }
+  }
+}
+function completeTerapia(id){
+  if(!state.doneTerapias.includes(id)) {
+    state.doneTerapias.push(id);
+    // Energia e pontos por terapia
+    state.energyLevel = Math.min(100, state.energyLevel + 3);
+    state.points += 5;
+    updateLevel();
+  }
+  saveState(); renderTerapias();
+  if(typeof renderEnergyBar === 'function') renderEnergyBar();
+  document.getElementById('btn-complete').textContent='✓ Realizada';
+  document.getElementById('btn-complete').classList.add('done');
+  showToast('✦ Terapia concluída', true);
+  setTimeout(closeModal,1000);
+}
+
+// ── NAVIGATION ──
+function goPage(name, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const page = document.getElementById('page-'+name);
+  if(page) {
+    page.classList.add('active');
+    if(btn) btn.classList.add('active');
+    if(name==='mapa') animateRadar();
+    if(name==='diario') renderDiario();
+    if(name==='arvore') renderArvore();
+    window.scrollTo(0,0);
+  }
+}
+
+// ── TOAST ──
+function showToast(msg,success=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast'+(success?' success':'');
+  setTimeout(()=>t.className='toast hidden',3000);
+}
+
+// ── STARS ──
+function initStars(){
+  const canvas=document.getElementById('starfield');
+  const ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  const stars=Array.from({length:80},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.5,o:Math.random(),s:Math.random()*.003+.001}));
+  function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.o+=s.s;if(s.o>1||s.o<0)s.s*=-1;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${s.o*0.6})`;ctx.fill();});requestAnimationFrame(draw);}
+  draw();
+  window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
+}
+
+// ── BOOT ──
+loadState();
+initStars();
+if(state.name){
+  document.getElementById('onboarding').style.display='none';
+  document.getElementById('main-app').style.display='flex';
+  initApp();
+} else {
+  document.getElementById('btn-complete').onclick = completeDay;
+}
+</script>
+</body>
+</html>
